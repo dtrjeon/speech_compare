@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0e0f11">
+<title>음성 비교기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f11;--surface:#17191d;--surface2:#1e2127;
+  --border:#2a2d35;--border2:#363a45;
+  --text:#e8eaf0;--text-muted:#7a7f8e;--text-dim:#4a4f5e;
+  --green:#4ade80;--green-bg:rgba(74,222,128,.13);--green-border:rgba(74,222,128,.3);
+  --red:#f87171;--red-bg:rgba(248,113,113,.13);--red-border:rgba(248,113,113,.3);
+  --amber:#fbbf24;--amber-bg:rgba(251,191,36,.12);--amber-border:rgba(251,191,36,.25);
+  --blue:#60a5fa;--blue-bg:rgba(96,165,250,.12);--blue-border:rgba(96,165,250,.25);
+  --accent:#7c6aff;--accent-glow:rgba(124,106,255,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+.page{max-width:480px;margin:0 auto;padding:20px 16px 48px;}
+
+/* Header */
+.header{margin-bottom:22px;}
+.tag{display:inline-block;font-size:10px;letter-spacing:.12em;color:var(--accent);border:1px solid var(--accent-glow);background:var(--accent-glow);padding:3px 10px;border-radius:20px;margin-bottom:10px;text-transform:uppercase;}
+h1{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.2;}
+h1 span{color:var(--accent);}
+.subtitle{margin-top:6px;font-size:13px;color:var(--text-muted);}
+.slabel{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;}
+
+/* 상태 배너 */
+.banner{border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:14px;line-height:1.6;display:none;}
+.banner-warn{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber);}
+.banner-ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);}
+.banner-err{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);}
+
+/* Chapter */
+.chapter-section{margin-bottom:20px;}
+.mode-row{display:flex;gap:8px;margin-bottom:10px;}
+.mode-btn{flex:1;padding:10px 0;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text-muted);font-family:'Noto Sans KR',sans-serif;font-size:13px;cursor:pointer;text-align:center;min-height:44px;touch-action:manipulation;}
+.mode-btn.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent);font-weight:500;}
+.chapters-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;}
+.chapter-btn{position:relative;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px 12px 12px;cursor:pointer;text-align:left;user-select:none;min-height:64px;touch-action:manipulation;width:100%;}
+.chapter-btn.selected{border-color:var(--accent);background:var(--accent-glow);}
+.ch-num{font-size:10px;color:var(--text-dim);margin-bottom:3px;}
+.chapter-btn.selected .ch-num{color:var(--accent);}
+.ch-title{font-size:16px;font-weight:500;color:var(--text);}
+.ch-order{position:absolute;top:8px;right:9px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:none;align-items:center;justify-content:center;}
+.chapter-btn.selected .ch-order{display:flex;}
+.preview-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;min-height:48px;}
+.preview-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px;}
+.preview-chip{background:var(--accent-glow);border:1px solid var(--accent);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--accent);}
+.preview-snip{font-size:12px;color:var(--text-muted);line-height:1.5;}
+.preview-empty{font-size:12px;color:var(--text-dim);}
+
+/* Input */
+.input-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.input-card-header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.card-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.card-title{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);}
+textarea{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:300;line-height:1.7;padding:14px;resize:none;min-height:90px;}
+textarea::placeholder{color:var(--text-dim);}
+
+/* 마이크 권한 버튼 */
+.btn-permission{
+  width:100%;min-height:52px;border-radius:12px;
+  border:1.5px solid var(--amber-border);background:var(--amber-bg);
+  color:var(--amber);font-family:'Noto Sans KR',sans-serif;
+  font-size:15px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-bottom:10px;touch-action:manipulation;
+}
+.btn-permission.granted{border-color:var(--green-border);background:var(--green-bg);color:var(--green);}
+
+/* 녹음/분석 버튼 */
+.rec-section{margin-bottom:14px;}
+.rec-btn-wrap{display:flex;gap:10px;margin-bottom:10px;}
+.btn-rec-main{
+  flex:1;min-height:60px;border-radius:14px;
+  border:1.5px solid var(--red-border);background:var(--red-bg);
+  color:var(--red);font-family:'Noto Sans KR',sans-serif;
+  font-size:16px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  touch-action:manipulation;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.btn-rec-main.recording{
+  background:var(--red);color:#fff;border-color:var(--red);
+  animation:rpulse 1.5s ease-in-out infinite;
+}
+@keyframes rpulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4);}50%{box-shadow:0 0 0 12px rgba(248,113,113,0);}}
+.rec-dot{width:16px;height:16px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.btn-rec-main.recording .rec-dot{animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.btn-analyze{
+  flex:1;min-height:60px;border-radius:14px;
+  border:none;background:var(--accent);color:#fff;
+  font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:500;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  touch-action:manipulation;
+}
+.btn-analyze:active{background:#6a59ee;}
+.btn-row2{display:flex;gap:8px;}
+.btn-sm{
+  flex:1;min-height:46px;border-radius:10px;
+  border:1px solid var(--border2);background:var(--surface2);
+  color:var(--text-muted);font-family:'Noto Sans KR',sans-serif;
+  font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  touch-action:manipulation;
+}
+.btn-sm:active{background:var(--border);}
+.status-bar{text-align:center;font-size:13px;color:var(--text-dim);margin-top:10px;min-height:20px;padding:4px;}
+
+/* Legend */
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;}
+.leg{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-muted);}
+.leg-chip{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:500;}
+
+/* Result */
+.result-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.empty-state{padding:36px 20px;text-align:center;color:var(--text-dim);font-size:13px;}
+.score-bar{padding:16px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.score-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.score-badge{font-size:38px;font-weight:700;line-height:1;}
+.score-info{flex:1;}
+.score-chapter{font-size:10px;color:var(--text-dim);margin-bottom:3px;}
+.score-grade{font-size:16px;font-weight:500;}
+.score-desc{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.stat-chip{border-radius:8px;padding:7px 4px;text-align:center;border:1px solid;}
+.stat-num{font-size:20px;font-weight:700;display:block;line-height:1.1;}
+.stat-lbl{font-size:10px;opacity:.8;}
+.diff-section{padding:16px;}
+.diff-block{margin-bottom:22px;}
+.diff-block:last-child{margin-bottom:0;}
+.diff-block-title{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.diff-content{font-size:15px;line-height:2.5;word-break:keep-all;}
+.w{display:inline-block;border-radius:5px;padding:1px 5px;margin:2px 2px;font-size:15px;}
+.w-ok{color:var(--text);}
+.w-miss{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);text-decoration:line-through;text-decoration-color:rgba(248,113,113,.5);}
+.w-extra{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber);}
+.w-sub{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue);}
+.w-ph{color:var(--text-dim);font-size:12px;padding:2px 6px;}
+.progress-wrap{padding:12px 16px;border-top:1px solid var(--border);background:var(--surface2);}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-bottom:6px;}
+.progress-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;transition:width .7s ease;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="tag">SPEECH · TEXT · COMPARE</div>
+    <h1>원본 vs 녹음<br><span>나란히 비교</span></h1>
+    <p class="subtitle">챕터를 선택하고 녹음 후 비교 분석하세요</p>
+  </div>
+
+  <!-- 상태 배너 -->
+  <div id="banner" class="banner"></div>
+
+  <!-- 마이크 권한 버튼 -->
+  <button class="btn-permission" id="btn-permission">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="9" y="2" width="6" height="12" rx="3"/>
+      <path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="21"/>
+      <line x1="8" y1="21" x2="16" y2="21"/>
+    </svg>
+    <span id="perm-label">마이크 권한 허용하기 (먼저 누르세요)</span>
+  </button>
+
+  <!-- 챕터 선택 -->
+  <div class="chapter-section">
+    <div class="slabel">원본 챕터 선택</div>
+    <div class="mode-row">
+      <button class="mode-btn active" id="mode-single">단일 선택</button>
+      <button class="mode-btn" id="mode-multi">복수 선택</button>
+    </div>
+    <div class="chapters-grid" id="chapters-grid"></div>
+    <div class="preview-box" id="preview-box">
+      <div class="preview-empty">챕터를 선택하면 원본이 자동으로 설정됩니다</div>
+    </div>
+  </div>
+
+  <!-- 원본 텍스트 -->
+  <div class="input-card">
+    <div class="input-card-header">
+      <div class="card-dot" style="background:var(--blue);"></div>
+      <span class="card-title">원본 텍스트</span>
+    </div>
+    <textarea id="original" rows="4" placeholder="챕터 선택 시 자동 입력됩니다. 직접 수정도 가능합니다."></textarea>
+  </div>
+
+  <!-- 녹음 텍스트 -->
+  <div class="input-card">
+    <div class="input-card-header">
+      <div class="card-dot" style="background:var(--accent);"></div>
+      <span class="card-title">녹음 텍스트</span>
+    </div>
+    <textarea id="recorded" rows="4" placeholder="아래 녹음 버튼을 누르거나 직접 입력하세요."></textarea>
+  </div>
+
+  <!-- 녹음 컨트롤 -->
+  <div class="rec-section">
+    <div class="rec-btn-wrap">
+      <button class="btn-rec-main" id="btn-rec">
+        <span class="rec-dot"></span>
+        <span id="rec-label">녹음 시작</span>
+      </button>
+      <button class="btn-analyze" id="btn-analyze">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="10" cy="10" r="8"/><path d="M6 10h8M10 6v8"/>
+        </svg>
+        비교 분석
+      </button>
+    </div>
+    <div class="btn-row2">
+      <button class="btn-sm" id="btn-clear-rec">녹음 지우기</button>
+      <button class="btn-sm" id="btn-clear-all">전체 초기화</button>
+    </div>
+    <div class="status-bar" id="status">⬆ 먼저 마이크 권한을 허용해 주세요</div>
+  </div>
+
+  <!-- 범례 -->
+  <div class="legend">
+    <div class="leg"><span class="leg-chip" style="background:rgba(255,255,255,.07);color:#e8eaf0;border:1px solid rgba(255,255,255,.12);">단어</span>일치</div>
+    <div class="leg"><span class="leg-chip" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);">단어</span>누락</div>
+    <div class="leg"><span class="leg-chip" style="background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);">단어</span>추가</div>
+    <div class="leg"><span class="leg-chip" style="background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);">단어</span>대체</div>
+  </div>
+
+  <div id="result-area">
+    <div class="result-panel"><div class="empty-state">비교 분석 결과가 여기에 표시됩니다</div></div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+/* ════════════════════════════════
+   챕터 데이터
+════════════════════════════════ */
+const CHAPTERS = [
+  { id:1, num:'1장', title:'서론',
+    text:`선생님 제가 질문 하나 드려도 되겠습니까. 선생님께서 만일 오늘이라도 이 세상을 떠나신다면 천국에 들어간다는 것을 확신하고 계십니까. 네 그러시군요. 저도 처음에는 잘 몰랐습니다. 그런데 성경을 통하여 그 사실을 알게 되었습니다. 성경은 내가 너희에게 이것을 쓰는 것은 너희로 하여금 너희에게 영생이 있음을 알게 하려 함이라 라고 말씀하십니다. 성경이 기록된 목적은 바로 우리에게 영생이 있음을 알려주어 확신을 갖도록 하기 위함이지요. 집사님은 만일 오늘이라도 이 세상을 떠나신다면 저처럼 천국에 들어간다는 확신이 있으세요. 저희는 이렇게 영생의 확신을 가지고 기쁘게 살고 있습니다. 선생님 제가 어떻게 영생을 얻게 되었는지 선생님도 어떻게 하면 저희들처럼 영생을 얻어 천국에 들어간다는 것을 확신할 수 있는지 말씀드려도 되겠습니까. 선생님 그 말씀을 드리기 전에 질문을 하나만 더 드리겠습니다. 선생님은 어떻게 하면 영생을 얻어 천국에 들어갈 수 있다고 생각하십니까. 선생님의 대답을 듣고 보니 선생님께 가장 기쁜 소식을 전해드릴 수 있겠군요. 그 기쁜 소식은` },
+  { id:2, num:'2장', title:'은혜',
+    text:`영생은 값없이 주시는 하나님의 선물입니다. 그러므로 영생은 돈이나 공로나 자격으로 얻는 것이 아닙니다. 성경은 너희는 그 은혜에 의하여 구원을 받았으니 이것은 너희에게서 난 것이 아니요 하나님의 선물이라 행위에서 난 것이 아니니 이는 누구든지 자랑하지 못하게 함이라 라고 말씀하십니다. 사실 우리가 살면서 생명과 관계되는 가장 중요한 것은 값없이 다 선물로 받았어요. 예를 들면 밝은 햇빛 공기 물 등은 값없이 다 선물로 거져 받았습니다. 이와 같이 영생도 하나님이 우리에게 값없이 다 선물로 주신다는 것입니다. 그렇다면 하나님은 영생을 왜 선물로 주셔야만 할까요. 이것은 성경이 인간에 관하여 하신 말씀을 잘 이해할 때 좀 더 분명히 알 수 있습니다.` },
+  { id:3, num:'3장', title:'인간',
+    text:`인간은 죄인입니다. 그러므로 죄인은 자신을 구원할 수 없습니다. 성경은 모든 사람이 죄를 범하였으매 하나님의 영광에 이르지 못하더니라고 말씀하십니다. 성경에서는 죄를 이렇게 정의하고 있습니다. 첫째 강도 살인 도적질 간음처럼 하지 말아야 할 것을 하는 것이 죄이고 둘째 부모 공경 이웃 사랑처럼 해야 하는 것을 하지 않는 것도 역시 죄이며 셋째 교만 탐심 미움 질투처럼 나쁜 마음이나 나쁜 생각을 하는 것도 죄입니다. 그러나 무엇보다도 하나님을 하나님으로 믿지 않는 것이 가장 큰 죄입니다. 이런 기준으로 볼 때 선생님은 하루에 몇 번 정도 죄를 짓는다고 생각하세요. 사실 우리는 자신도 모르게 많은 죄를 지으며 살지요. 성경의 기준으로 볼 때 어떤 사람이 하루에 열번이나 다섯번 아니 단지 세 번만 죄를 짓는다고 생각해 보십시다. 그 사람은 걸어다니는 천사라고 할 수 있을 것입니다. 그러나 그런 천사와 같은 자라도 하루 세 번씩 일년이면 천 번 이상 구십평생을 산다면 구만 번 이상의 죄를 짓게 되는 셈이지요. 그래서 이 세상에서 자신은 죄인이 아니라고 주장할 수 있는 사람은 단 한 사람도 없습니다. 그렇다면 이런 죄인이 어떻게 영생을 선물로 받을 수 있을까요. 이것은 성경이 하나님에 관하여 하신 말씀을 잘 이해할 때 좀 더 분명히 알 수 있습니다.` },
+  { id:4, num:'4장', title:'하나님',
+    text:`하나님은 자비로우셔서 우리를 벌하시는 것을 원치 않으십니다. 하지만 하나님은 의로우시기 때문에 반드시 우리 죄를 벌하셔야만 합니다. 성경은 하나님은 사랑이심이라라고 말씀하십니다. 하지만 벌을 면제하지는 아니하고 보응하리라라고 말씀하십니다. 전쟁 중인 러시아 제국에서 부족한 식량을 훔치는 사건이 종종 발생했습니다. 화가 난 지휘관 가르시아 장군은 누구든지 식량을 훔치다 잡힌 사람에게는 끔찍한 채찍질을 가하겠다고 선포했습니다. 그런데 도둑을 잡고 보니 다른 사람이 아닌 그의 어머니였습니다. 장군은 원칙대로 사랑하는 어머니에게 채찍질을 가하자니 늙으신 어머님이 돌아가실 것 같고 원칙을 무시하고 그냥 넘어가자니 부하들에게 군기가 서지 않을 것 같았습니다. 결국 지휘관이 만든 원칙에 따라 처벌해야 하는 날 그는 어머니 앞에서 겉옷을 벗었습니다. 그리고 부하들에게 명했습니다. 어머니 대신 나에게 채찍을 가하라. 그는 어머니 대신 채찍에 맞음으로써 어머니를 향한 사랑을 실천했을 뿐만 아니라 동시에 죄인을 처벌하는 공의도 실천하게 된 것입니다. 이처럼 자비로우시고 의로우신 하나님은 우리의 죄 문제를 예수 그리스도 안에서 단번에 해결하셨습니다.` },
+  { id:5, num:'5장', title:'그리스도', text:`(5장 그리스도 본문을 여기에 입력하세요)` },
+  { id:6, num:'6장', title:'믿음',    text:`(6장 믿음 본문을 여기에 입력하세요)` }
+];
+
+/* ════════════════════════════════
+   상태
+════════════════════════════════ */
+let mode = 'single';
+let selected = [];
+let recognition = null;
+let isRecording = false;
+let transcript = '';
+let micGranted = false;
+let mediaStream = null;
+
+/* ════════════════════════════════
+   유틸
+════════════════════════════════ */
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+function showBanner(msg, type) {
+  const b = document.getElementById('banner');
+  b.className = 'banner banner-' + type;
+  b.innerHTML = msg;
+  b.style.display = 'block';
+}
+function hideBanner() {
+  document.getElementById('banner').style.display = 'none';
+}
+
+/* ════════════════════════════════
+   ① 마이크 권한 — getUserMedia로 먼저 열기
+   (안드로이드 Chrome: SpeechRecognition 전에
+    getUserMedia로 스트림을 열어야 권한 팝업이 뜸)
+════════════════════════════════ */
+document.getElementById('btn-permission').addEventListener('click', async function() {
+  try {
+    setStatus('마이크 권한 요청 중...');
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // 스트림은 권한 확인용이므로 바로 정지
+    mediaStream.getTracks().forEach(t => t.stop());
+    mediaStream = null;
+
+    micGranted = true;
+    this.classList.add('granted');
+    document.getElementById('perm-label').textContent = '마이크 권한 허용됨 ✓';
+    setStatus('준비 완료 — 녹음 시작 버튼을 누르세요');
+    hideBanner();
+  } catch (e) {
+    showBanner('⚠ 마이크 권한이 거부되었습니다.<br>Chrome 주소창 왼쪽 🔒 → 마이크 → 허용 후 새로고침해 주세요.', 'err');
+    setStatus('마이크 권한 거부됨');
+  }
+});
+
+/* ════════════════════════════════
+   챕터 렌더
+════════════════════════════════ */
+function renderChapters() {
+  const grid = document.getElementById('chapters-grid');
+  grid.innerHTML = CHAPTERS.map(ch =>
+    `<button class="chapter-btn" id="ch-btn-${ch.id}" data-id="${ch.id}">
+       <div class="ch-num">${ch.num}</div>
+       <div class="ch-title">${ch.title}</div>
+       <div class="ch-order" id="ch-order-${ch.id}"></div>
+     </button>`
+  ).join('');
+
+  // addEventListener 방식 (onclick 인라인 대신)
+  grid.querySelectorAll('.chapter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      toggleChapter(parseInt(this.dataset.id));
+    });
+  });
+}
+
+document.getElementById('mode-single').addEventListener('click', () => setMode('single'));
+document.getElementById('mode-multi').addEventListener('click',  () => setMode('multi'));
+
+function setMode(m) {
+  mode = m; selected = [];
+  document.getElementById('mode-single').classList.toggle('active', m === 'single');
+  document.getElementById('mode-multi').classList.toggle('active',  m === 'multi');
+  updateChapterUI();
+}
+
+function toggleChapter(id) {
+  if (mode === 'single') {
+    selected = selected[0] === id ? [] : [id];
+  } else {
+    const i = selected.indexOf(id);
+    if (i === -1) selected.push(id); else selected.splice(i, 1);
+  }
+  updateChapterUI();
+}
+
+function updateChapterUI() {
+  CHAPTERS.forEach(ch => {
+    const btn = document.getElementById('ch-btn-' + ch.id);
+    const ord = document.getElementById('ch-order-' + ch.id);
+    const idx = selected.indexOf(ch.id);
+    btn.classList.toggle('selected', idx !== -1);
+    ord.textContent = (idx !== -1 && mode === 'multi') ? (idx + 1) : '';
+  });
+
+  const box = document.getElementById('preview-box');
+  if (selected.length === 0) {
+    box.innerHTML = '<div class="preview-empty">챕터를 선택하면 원본이 자동으로 설정됩니다</div>';
+    document.getElementById('original').value = '';
+    return;
+  }
+  const combined = selected.map(id => CHAPTERS.find(c => c.id === id).text).join(' ');
+  const chips = selected.map(id => {
+    const c = CHAPTERS.find(x => x.id === id);
+    return `<span class="preview-chip">${c.num} ${c.title}</span>`;
+  }).join('');
+  box.innerHTML = `<div class="preview-chips">${chips}</div><div class="preview-snip">${combined.slice(0, 80)}…</div>`;
+  document.getElementById('original').value = combined;
+}
+
+/* ════════════════════════════════
+   ② 녹음 버튼
+════════════════════════════════ */
+document.getElementById('btn-rec').addEventListener('click', function() {
+  if (!micGranted) {
+    showBanner('⚠ 먼저 위의 <strong>마이크 권한 허용</strong> 버튼을 눌러 주세요.', 'warn');
+    setStatus('마이크 권한이 필요합니다');
+    return;
+  }
+  isRecording ? stopRec() : startRec();
+});
+
+function startRec() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    showBanner('⚠ 음성 인식을 지원하지 않습니다. <strong>Chrome 브라우저</strong>를 사용해 주세요.', 'err');
+    return;
+  }
+
+  hideBanner();
+  recognition = new SR();
+  recognition.lang = 'ko-KR';
+  recognition.continuous = false;      // 안드로이드 호환
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  let base = transcript;
+
+  recognition.onstart = function() {
+    isRecording = true;
+    document.getElementById('btn-rec').classList.add('recording');
+    document.getElementById('rec-label').textContent = '녹음 중지';
+    setStatus('● 녹음 중... 말씀하세요');
+  };
+
+  recognition.onresult = function(e) {
+    let interim = '', final = base;
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    transcript = final;
+    document.getElementById('recorded').value = transcript + (interim ? ' (' + interim + ')' : '');
+  };
+
+  recognition.onerror = function(e) {
+    if (e.error === 'no-speech' || e.error === 'audio-capture') return; // 무시 후 재시작
+    if (e.error === 'not-allowed') {
+      showBanner('⚠ 마이크 권한이 차단되었습니다. 브라우저 설정에서 마이크를 허용해 주세요.', 'err');
+      stopRec(); return;
+    }
+    setStatus('인식 오류: ' + e.error + ' — 재시도 중');
+  };
+
+  recognition.onend = function() {
+    // 안드로이드: onend 후 자동 재시작으로 연속 녹음
+    if (isRecording) {
+      base = transcript;
+      try { recognition.start(); } catch(err) { /* 이미 시작됨 */ }
+    }
+  };
+
+  try {
+    recognition.start();
+  } catch(e) {
+    setStatus('녹음 시작 실패: ' + e.message);
+  }
+}
+
+function stopRec() {
+  isRecording = false;
+  if (recognition) {
+    recognition.onend = null;
+    try { recognition.stop(); } catch(e) {}
+  }
+  document.getElementById('btn-rec').classList.remove('recording');
+  document.getElementById('rec-label').textContent = '녹음 시작';
+  document.getElementById('recorded').value = transcript;
+  setStatus('녹음 완료 ✓  —  비교 분석 버튼을 누르세요');
+}
+
+/* ════════════════════════════════
+   기타 버튼
+════════════════════════════════ */
+document.getElementById('btn-clear-rec').addEventListener('click', function() {
+  if (isRecording) stopRec();
+  transcript = '';
+  document.getElementById('recorded').value = '';
+  setStatus('녹음 내용이 지워졌습니다');
+});
+
+document.getElementById('btn-clear-all').addEventListener('click', function() {
+  if (isRecording) stopRec();
+  transcript = ''; selected = [];
+  document.getElementById('recorded').value = '';
+  document.getElementById('result-area').innerHTML =
+    '<div class="result-panel"><div class="empty-state">비교 분석 결과가 여기에 표시됩니다</div></div>';
+  updateChapterUI();
+  setStatus('초기화 완료');
+});
+
+document.getElementById('btn-analyze').addEventListener('click', compare);
+
+/* ════════════════════════════════
+   비교 로직
+════════════════════════════════ */
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function splitSentences(raw) {
+  const sents = raw.split(/(?<=[.?!。？！])\s+/).map(s => s.trim()).filter(Boolean);
+  const wordList = [], wordSentIdx = [];
+  sents.forEach((s, si) => {
+    s.replace(/[.,?!，。？！""''「」『』()（）[\]]/g, '')
+     .replace(/\s+/g, ' ').trim().toLowerCase()
+     .split(' ').filter(Boolean)
+     .forEach(w => { wordList.push(w); wordSentIdx.push(si); });
+  });
+  return { wordList, wordSentIdx };
+}
+
+function normWords(s) {
+  return s.replace(/[.,?!，。？！""''「」『』()（）[\]]/g, '')
+          .replace(/\s+/g, ' ').trim().toLowerCase()
+          .split(' ').filter(Boolean);
+}
+
+function lcsOps(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
+  let i = m, j = n;
+  const ops = [];
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i-1] === b[j-1]) { ops.unshift({t:'ok',  aw:a[i-1], bw:b[j-1]}); i--; j--; }
+    else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { ops.unshift({t:'extra', bw:b[j-1]}); j--; }
+    else { ops.unshift({t:'miss', aw:a[i-1]}); i--; }
+  }
+  return ops;
+}
+
+function mergeOps(ops) {
+  const merged = [];
+  for (let k = 0; k < ops.length; ) {
+    if (ops[k].t === 'miss' && ops[k+1] && ops[k+1].t === 'extra') {
+      merged.push({t:'sub', aw:ops[k].aw, bw:ops[k+1].bw}); k += 2;
+    } else { merged.push(ops[k]); k++; }
+  }
+  return merged;
+}
+
+function compare() {
+  if (isRecording) stopRec();
+  const origRaw = document.getElementById('original').value.trim();
+  const recRaw  = document.getElementById('recorded').value.trim() || transcript.trim();
+  if (!origRaw) { alert('원본 텍스트를 선택하거나 입력해 주세요.'); return; }
+  if (!recRaw)  { alert('녹음 텍스트가 없습니다.'); return; }
+
+  const { wordList: origWords, wordSentIdx } = splitSentences(origRaw);
+  const recWords = normWords(recRaw);
+  const ops = mergeOps(lcsOps(origWords, recWords));
+
+  let correct=0, missing=0, extra=0, sub=0;
+  ops.forEach(o => {
+    if(o.t==='ok') correct++; else if(o.t==='miss') missing++;
+    else if(o.t==='extra') extra++; else sub++;
+  });
+  const accuracy = Math.round(correct / Math.max(origWords.length, 1) * 100);
+
+  const BR = '<br style="display:block;margin:5px 0 1px;">';
+  let origPtr = 0, lastSI = -1, lH = '', rH = '';
+  ops.forEach(o => {
+    if (o.t !== 'extra') {
+      const si = wordSentIdx[origPtr] !== undefined ? wordSentIdx[origPtr] : lastSI;
+      if (si !== lastSI && lastSI !== -1) { lH += BR; rH += BR; }
+      lastSI = si; origPtr++;
+    }
+    if      (o.t==='ok')    { lH+=`<span class="w w-ok">${esc(o.aw)}</span>`;   rH+=`<span class="w w-ok">${esc(o.bw)}</span>`; }
+    else if (o.t==='miss')  { lH+=`<span class="w w-miss">${esc(o.aw)}</span>`; rH+=`<span class="w w-ph">—</span>`; }
+    else if (o.t==='extra') { lH+=`<span class="w w-ph">—</span>`;              rH+=`<span class="w w-extra">${esc(o.bw)}</span>`; }
+    else                    { lH+=`<span class="w w-sub">${esc(o.aw)}</span>`;  rH+=`<span class="w w-sub">${esc(o.bw)}</span>`; }
+  });
+
+  let grade, sc, gd;
+  if      (accuracy >= 95) { grade='완벽'; sc='#4ade80'; gd='거의 완벽하게 일치합니다!'; }
+  else if (accuracy >= 80) { grade='우수'; sc='#60a5fa'; gd='대부분 일치합니다.'; }
+  else if (accuracy >= 60) { grade='보통'; sc='#fbbf24'; gd='절반 이상 일치합니다.'; }
+  else                     { grade='미흡'; sc='#f87171'; gd='많은 부분이 다릅니다.'; }
+  const bc = accuracy>=95?'#4ade80':accuracy>=80?'#60a5fa':accuracy>=60?'#fbbf24':'#f87171';
+  const chInfo = selected.length > 0
+    ? selected.map(id => { const c = CHAPTERS.find(x => x.id===id); return c.num+' '+c.title; }).join(' + ')
+    : '직접 입력';
+
+  document.getElementById('result-area').innerHTML = `
+    <div class="result-panel">
+      <div class="score-bar">
+        <div class="score-top">
+          <div class="score-badge" style="color:${sc};">${accuracy}%</div>
+          <div class="score-info">
+            <div class="score-chapter">${chInfo}</div>
+            <div class="score-grade" style="color:${sc};">${grade}</div>
+            <div class="score-desc">${gd}</div>
+          </div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-chip" style="background:var(--green-bg);border-color:var(--green-border);color:var(--green);">
+            <span class="stat-num">${correct}</span><span class="stat-lbl">일치</span></div>
+          <div class="stat-chip" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red);">
+            <span class="stat-num">${missing}</span><span class="stat-lbl">누락</span></div>
+          <div class="stat-chip" style="background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber);">
+            <span class="stat-num">${extra}</span><span class="stat-lbl">추가</span></div>
+          <div class="stat-chip" style="background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue);">
+            <span class="stat-num">${sub}</span><span class="stat-lbl">대체</span></div>
+        </div>
+      </div>
+      <div class="diff-section">
+        <div class="diff-block">
+          <div class="diff-block-title">원본 텍스트</div>
+          <div class="diff-content">${lH || '<span style="color:var(--text-dim);">내용 없음</span>'}</div>
+        </div>
+        <div class="diff-block">
+          <div class="diff-block-title">녹음 텍스트</div>
+          <div class="diff-content">${rH || '<span style="color:var(--text-dim);">내용 없음</span>'}</div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>일치율</span><span>${accuracy}%</span></div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${accuracy}%;background:${bc};"></div>
+        </div>
+      </div>
+    </div>`;
+
+  setTimeout(() => {
+    document.getElementById('result-area').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 150);
+}
+
+/* ════════════════════════════════
+   초기화
+════════════════════════════════ */
+renderChapters();
+</script>
+</body>
+</html>
