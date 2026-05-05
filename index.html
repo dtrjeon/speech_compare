@@ -17,6 +17,7 @@
   --amber:#fbbf24;--amber-bg:rgba(251,191,36,.12);--amber-border:rgba(251,191,36,.25);
   --blue:#60a5fa;--blue-bg:rgba(96,165,250,.12);--blue-border:rgba(96,165,250,.25);
   --accent:#7c6aff;--accent-glow:rgba(124,106,255,.22);
+  --clova:#00c471;--clova-bg:rgba(0,196,113,.12);--clova-border:rgba(0,196,113,.3);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
@@ -31,7 +32,7 @@ h1 span{color:var(--accent);}
 .subtitle{margin-top:6px;font-size:13px;color:var(--text-muted);}
 .slabel{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;}
 
-/* 상태 배너 */
+/* 배너 */
 .banner{border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:14px;line-height:1.6;display:none;}
 .banner-warn{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber);}
 .banner-ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);}
@@ -56,7 +57,7 @@ h1 span{color:var(--accent);}
 .preview-snip{font-size:12px;color:var(--text-muted);line-height:1.5;}
 .preview-empty{font-size:12px;color:var(--text-dim);}
 
-/* Input */
+/* 원본 텍스트 카드 */
 .input-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
 .input-card-header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface2);}
 .card-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
@@ -64,43 +65,136 @@ h1 span{color:var(--accent);}
 textarea{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:300;line-height:1.7;padding:14px;resize:none;min-height:90px;}
 textarea::placeholder{color:var(--text-dim);}
 
+/* ── 입력방식 탭 ── */
+.input-mode-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.input-mode-tabs{display:flex;border-bottom:1px solid var(--border);}
+.input-tab{
+  flex:1;padding:12px 8px;text-align:center;
+  font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:400;
+  color:var(--text-dim);background:var(--surface2);
+  border:none;cursor:pointer;touch-action:manipulation;
+  border-bottom:2px solid transparent;
+  transition:color .15s,border-color .15s,background .15s;
+}
+.input-tab.active-mic{color:var(--red);border-bottom-color:var(--red);background:var(--surface);}
+.input-tab.active-clova{color:var(--clova);border-bottom-color:var(--clova);background:var(--surface);}
+.tab-icon{display:block;font-size:18px;margin-bottom:2px;}
+.tab-label{font-size:11px;}
+
+/* 탭 패널 */
+.tab-panel{display:none;padding:14px;}
+.tab-panel.active{display:block;}
+
 /* 마이크 권한 버튼 */
 .btn-permission{
-  width:100%;min-height:52px;border-radius:12px;
+  width:100%;min-height:48px;border-radius:10px;
   border:1.5px solid var(--amber-border);background:var(--amber-bg);
   color:var(--amber);font-family:'Noto Sans KR',sans-serif;
-  font-size:15px;font-weight:500;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:14px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
   margin-bottom:10px;touch-action:manipulation;
 }
 .btn-permission.granted{border-color:var(--green-border);background:var(--green-bg);color:var(--green);}
 
-/* 녹음/분석 버튼 */
-.rec-section{margin-bottom:14px;}
-.rec-btn-wrap{display:flex;gap:10px;margin-bottom:10px;}
+/* 녹음 버튼 */
 .btn-rec-main{
-  flex:1;min-height:60px;border-radius:14px;
+  width:100%;min-height:56px;border-radius:12px;
   border:1.5px solid var(--red-border);background:var(--red-bg);
   color:var(--red);font-family:'Noto Sans KR',sans-serif;
   font-size:16px;font-weight:500;cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:10px;
   touch-action:manipulation;
   transition:background .15s,color .15s,border-color .15s;
+  margin-bottom:8px;
 }
-.btn-rec-main.recording{
-  background:var(--red);color:#fff;border-color:var(--red);
-  animation:rpulse 1.5s ease-in-out infinite;
-}
+.btn-rec-main.recording{background:var(--red);color:#fff;border-color:var(--red);animation:rpulse 1.5s ease-in-out infinite;}
 @keyframes rpulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.4);}50%{box-shadow:0 0 0 12px rgba(248,113,113,0);}}
-.rec-dot{width:16px;height:16px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.rec-dot{width:14px;height:14px;border-radius:50%;background:currentColor;flex-shrink:0;}
 .btn-rec-main.recording .rec-dot{animation:blink 1s infinite;}
+
+/* 저장 버튼 */
+.save-row{display:flex;gap:8px;margin-top:8px;}
+.btn-save{
+  flex:1;min-height:46px;border-radius:10px;
+  border:1px solid var(--border2);background:var(--surface2);
+  color:var(--text-muted);font-family:'Noto Sans KR',sans-serif;
+  font-size:13px;font-weight:400;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  touch-action:manipulation;transition:background .15s,color .15s,border-color .15s;
+}
+.btn-save:active{background:var(--border);}
+.btn-save.ready{border-color:var(--green-border);background:var(--green-bg);color:var(--green);}
+.btn-save:disabled{opacity:.3;cursor:not-allowed;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.btn-analyze{
-  flex:1;min-height:60px;border-radius:14px;
-  border:none;background:var(--accent);color:#fff;
-  font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:500;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+
+/* 클로바노트 패널 */
+.clova-guide{
+  background:var(--clova-bg);border:1px solid var(--clova-border);
+  border-radius:10px;padding:12px 14px;margin-bottom:10px;
+  font-size:13px;color:var(--clova);line-height:1.8;
+}
+.clova-guide strong{font-weight:500;}
+.clova-guide ol{padding-left:16px;margin-top:4px;}
+.clova-guide li{margin-bottom:2px;}
+.clova-paste-area{
+  width:100%;min-height:120px;background:var(--surface2);
+  border:1.5px dashed var(--clova-border);border-radius:10px;
+  outline:none;color:var(--text);font-family:'Noto Sans KR',sans-serif;
+  font-size:15px;font-weight:300;line-height:1.7;padding:14px;
+  resize:none;
+}
+.clova-paste-area::placeholder{color:var(--text-dim);}
+.clova-paste-area:focus{border-color:var(--clova);border-style:solid;}
+.btn-clova-apply{
+  width:100%;min-height:48px;border-radius:10px;margin-top:8px;
+  border:1.5px solid var(--clova-border);background:var(--clova-bg);
+  color:var(--clova);font-family:'Noto Sans KR',sans-serif;
+  font-size:15px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
   touch-action:manipulation;
+}
+.btn-clova-apply:active{background:rgba(0,196,113,.25);}
+
+/* 파일 불러오기 */
+.btn-file-upload{
+  width:100%;min-height:52px;border-radius:10px;
+  border:1.5px dashed var(--clova-border);background:var(--surface2);
+  color:var(--clova);font-family:'Noto Sans KR',sans-serif;
+  font-size:15px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  touch-action:manipulation;transition:background .15s;margin-bottom:6px;
+}
+.btn-file-upload:active{background:var(--clova-bg);}
+.file-name-tag{
+  display:none;padding:6px 12px;margin-bottom:8px;
+  background:var(--clova-bg);border:1px solid var(--clova-border);
+  border-radius:8px;font-size:12px;color:var(--clova);
+  text-align:center;word-break:break-all;
+}
+.divider-or{
+  display:flex;align-items:center;gap:8px;
+  margin:10px 0;font-size:11px;color:var(--text-dim);letter-spacing:.06em;
+}
+.divider-or::before,.divider-or::after{content:'';flex:1;height:1px;background:var(--border2);}
+
+/* 녹음 텍스트 미리보기 */
+.recorded-preview{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:10px 14px;margin-top:10px;
+  font-size:13px;color:var(--text-muted);line-height:1.6;min-height:44px;
+}
+.recorded-preview-label{font-size:10px;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+.recorded-preview-text{font-size:14px;color:var(--text);}
+.recorded-preview-empty{font-size:13px;color:var(--text-dim);}
+
+/* 분석/초기화 버튼 */
+.bottom-btns{margin-top:10px;}
+.btn-analyze{
+  width:100%;min-height:56px;border-radius:14px;
+  border:none;background:var(--accent);color:#fff;
+  font-family:'Noto Sans KR',sans-serif;font-size:17px;font-weight:500;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  touch-action:manipulation;margin-bottom:8px;
 }
 .btn-analyze:active{background:#6a59ee;}
 .btn-row2{display:flex;gap:8px;}
@@ -115,12 +209,12 @@ textarea::placeholder{color:var(--text-dim);}
 .btn-sm:active{background:var(--border);}
 .status-bar{text-align:center;font-size:13px;color:var(--text-dim);margin-top:10px;min-height:20px;padding:4px;}
 
-/* Legend */
+/* 범례 */
 .legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;}
 .leg{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-muted);}
 .leg-chip{display:inline-block;padding:1px 7px;border-radius:4px;font-size:11px;font-weight:500;}
 
-/* Result */
+/* 결과 */
 .result-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
 .empty-state{padding:36px 20px;text-align:center;color:var(--text-dim);font-size:13px;}
 .score-bar{padding:16px;background:var(--surface2);border-bottom:1px solid var(--border);}
@@ -157,21 +251,10 @@ textarea::placeholder{color:var(--text-dim);}
   <div class="header">
     <div class="tag">SPEECH · TEXT · COMPARE</div>
     <h1>원본 vs 녹음<br><span>나란히 비교</span></h1>
-    <p class="subtitle">챕터를 선택하고 녹음 후 비교 분석하세요</p>
+    <p class="subtitle">챕터를 선택하고 마이크 또는 클로바노트로 비교하세요</p>
   </div>
 
-  <!-- 상태 배너 -->
   <div id="banner" class="banner"></div>
-
-  <!-- 마이크 권한 버튼 -->
-  <button class="btn-permission" id="btn-permission">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="9" y="2" width="6" height="12" rx="3"/>
-      <path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="21"/>
-      <line x1="8" y1="21" x2="16" y2="21"/>
-    </svg>
-    <span id="perm-label">마이크 권한 허용하기 (먼저 누르세요)</span>
-  </button>
 
   <!-- 챕터 선택 -->
   <div class="chapter-section">
@@ -195,38 +278,116 @@ textarea::placeholder{color:var(--text-dim);}
     <textarea id="original" rows="4" placeholder="챕터 선택 시 자동 입력됩니다. 직접 수정도 가능합니다."></textarea>
   </div>
 
-  <!-- 녹음 텍스트 -->
-  <div class="input-card">
-    <div class="input-card-header">
-      <div class="card-dot" style="background:var(--accent);"></div>
-      <span class="card-title">녹음 텍스트</span>
+  <!-- ── 입력방식 탭 카드 ── -->
+  <div class="input-mode-card">
+    <div class="input-mode-tabs">
+      <button class="input-tab active-mic" id="tab-mic">
+        <span class="tab-icon">🎙️</span>
+        <span class="tab-label">마이크 녹음</span>
+      </button>
+      <button class="input-tab" id="tab-clova">
+        <span class="tab-icon">📋</span>
+        <span class="tab-label">클로바노트 붙여넣기</span>
+      </button>
     </div>
-    <textarea id="recorded" rows="4" placeholder="아래 녹음 버튼을 누르거나 직접 입력하세요."></textarea>
-  </div>
 
-  <!-- 녹음 컨트롤 -->
-  <div class="rec-section">
-    <div class="rec-btn-wrap">
+    <!-- 마이크 패널 -->
+    <div class="tab-panel active" id="panel-mic">
+      <button class="btn-permission" id="btn-permission">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="2" width="6" height="12" rx="3"/>
+          <path d="M5 10a7 7 0 0 0 14 0"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+        </svg>
+        <span id="perm-label">① 마이크 권한 허용 (먼저 누르세요)</span>
+      </button>
       <button class="btn-rec-main" id="btn-rec">
         <span class="rec-dot"></span>
-        <span id="rec-label">녹음 시작</span>
+        <span id="rec-label">② 녹음 시작</span>
       </button>
-      <button class="btn-analyze" id="btn-analyze">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="10" cy="10" r="8"/><path d="M6 10h8M10 6v8"/>
+      <div class="save-row">
+        <button class="btn-save" id="btn-save-txt" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+          텍스트 저장 (.txt)
+        </button>
+        <button class="btn-save" id="btn-save-audio" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+          </svg>
+          음성 저장 (.webm)
+        </button>
+      </div>
+    </div>
+
+    <!-- 클로바노트 패널 -->
+    <div class="tab-panel" id="panel-clova">
+      <div class="clova-guide">
+        <strong>📱 클로바노트 사용 방법 (2가지)</strong>
+        <ol>
+          <li>클로바노트 앱 → 녹음 → 텍스트 변환</li>
+          <li><b>방법A</b> 파일저장: 공유 → txt 저장 → 아래 📂 불러오기</li>
+          <li><b>방법B</b> 복사: 전체선택 → 복사 → 아래 칸에 붙여넣기</li>
+          <li>적용 버튼 누르기</li>
+        </ol>
+      </div>
+
+      <!-- 방법A: 파일 불러오기 -->
+      <input type="file" id="clova-file-input" accept=".txt,.text" style="display:none;">
+      <button class="btn-file-upload" id="btn-file-upload">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <line x1="9" y1="15" x2="15" y2="15"/>
         </svg>
-        비교 분석
+        📂 파일 불러오기 (.txt)
+      </button>
+      <div class="file-name-tag" id="file-name-tag"></div>
+
+      <div class="divider-or">OR</div>
+
+      <!-- 방법B: 직접 붙여넣기 -->
+      <textarea class="clova-paste-area" id="clova-paste"
+        placeholder="클로바노트에서 복사한 텍스트를 여기에 붙여넣으세요...
+(길게 탭 → 붙여넣기)"></textarea>
+      <button class="btn-clova-apply" id="btn-clova-apply">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        녹음 텍스트로 적용하기
       </button>
     </div>
+  </div>
+
+  <!-- 현재 녹음 텍스트 미리보기 -->
+  <div class="recorded-preview" id="recorded-preview">
+    <div class="recorded-preview-label">현재 입력된 녹음 텍스트</div>
+    <div class="recorded-preview-empty" id="recorded-preview-text">아직 입력된 내용이 없습니다</div>
+  </div>
+
+  <!-- 분석 / 초기화 -->
+  <div class="bottom-btns">
+    <button class="btn-analyze" id="btn-analyze">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="10" cy="10" r="8"/><path d="M6 10h8M10 6v8"/>
+      </svg>
+      비교 분석
+    </button>
     <div class="btn-row2">
       <button class="btn-sm" id="btn-clear-rec">녹음 지우기</button>
       <button class="btn-sm" id="btn-clear-all">전체 초기화</button>
     </div>
-    <div class="status-bar" id="status">⬆ 먼저 마이크 권한을 허용해 주세요</div>
+    <div class="status-bar" id="status">마이크 또는 클로바노트로 텍스트를 입력하세요</div>
   </div>
 
   <!-- 범례 -->
-  <div class="legend">
+  <div class="legend" style="margin-top:14px;">
     <div class="leg"><span class="leg-chip" style="background:rgba(255,255,255,.07);color:#e8eaf0;border:1px solid rgba(255,255,255,.12);">단어</span>일치</div>
     <div class="leg"><span class="leg-chip" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);">단어</span>누락</div>
     <div class="leg"><span class="leg-chip" style="background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);">단어</span>추가</div>
@@ -237,12 +398,10 @@ textarea::placeholder{color:var(--text-dim);}
     <div class="result-panel"><div class="empty-state">비교 분석 결과가 여기에 표시됩니다</div></div>
   </div>
 
-</div><!-- /page -->
+</div>
 
 <script>
-/* ════════════════════════════════
-   챕터 데이터
-════════════════════════════════ */
+/* ════════════ 챕터 데이터 ════════════ */
 const CHAPTERS = [
   { id:1, num:'1장', title:'서론',
     text:`선생님 제가 질문 하나 드려도 되겠습니까. 선생님께서 만일 오늘이라도 이 세상을 떠나신다면 천국에 들어간다는 것을 확신하고 계십니까. 네 그러시군요. 저도 처음에는 잘 몰랐습니다. 그런데 성경을 통하여 그 사실을 알게 되었습니다. 성경은 내가 너희에게 이것을 쓰는 것은 너희로 하여금 너희에게 영생이 있음을 알게 하려 함이라 라고 말씀하십니다. 성경이 기록된 목적은 바로 우리에게 영생이 있음을 알려주어 확신을 갖도록 하기 위함이지요. 집사님은 만일 오늘이라도 이 세상을 떠나신다면 저처럼 천국에 들어간다는 확신이 있으세요. 저희는 이렇게 영생의 확신을 가지고 기쁘게 살고 있습니다. 선생님 제가 어떻게 영생을 얻게 되었는지 선생님도 어떻게 하면 저희들처럼 영생을 얻어 천국에 들어간다는 것을 확신할 수 있는지 말씀드려도 되겠습니까. 선생님 그 말씀을 드리기 전에 질문을 하나만 더 드리겠습니다. 선생님은 어떻게 하면 영생을 얻어 천국에 들어갈 수 있다고 생각하십니까. 선생님의 대답을 듣고 보니 선생님께 가장 기쁜 소식을 전해드릴 수 있겠군요. 그 기쁜 소식은` },
@@ -256,61 +415,53 @@ const CHAPTERS = [
   { id:6, num:'6장', title:'믿음',    text:`(6장 믿음 본문을 여기에 입력하세요)` }
 ];
 
-/* ════════════════════════════════
-   상태
-════════════════════════════════ */
-let mode = 'single';
-let selected = [];
-let recognition = null;
-let isRecording = false;
+/* ════════════ 상태 ════════════ */
+let mode = 'single', selected = [];
+let recognition = null, isRecording = false;
 let transcript = '';
+let recordedText = '';
 let micGranted = false;
-let mediaStream = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let audioBlob = null;
 
-/* ════════════════════════════════
-   유틸
-════════════════════════════════ */
-function setStatus(msg) {
-  document.getElementById('status').textContent = msg;
-}
-function showBanner(msg, type) {
+/* ════════════ 유틸 ════════════ */
+function setStatus(msg){ document.getElementById('status').textContent = msg; }
+function showBanner(msg, type){
   const b = document.getElementById('banner');
   b.className = 'banner banner-' + type;
   b.innerHTML = msg;
   b.style.display = 'block';
 }
-function hideBanner() {
-  document.getElementById('banner').style.display = 'none';
+function hideBanner(){ document.getElementById('banner').style.display = 'none'; }
+function updateRecordedPreview(){
+  const el = document.getElementById('recorded-preview-text');
+  if(!recordedText){
+    el.className = 'recorded-preview-empty';
+    el.textContent = '아직 입력된 내용이 없습니다';
+  } else {
+    el.className = 'recorded-preview-text';
+    el.textContent = recordedText.slice(0,100) + (recordedText.length > 100 ? '…' : '');
+  }
 }
 
-/* ════════════════════════════════
-   ① 마이크 권한 — getUserMedia로 먼저 열기
-   (안드로이드 Chrome: SpeechRecognition 전에
-    getUserMedia로 스트림을 열어야 권한 팝업이 뜸)
-════════════════════════════════ */
-document.getElementById('btn-permission').addEventListener('click', async function() {
-  try {
-    setStatus('마이크 권한 요청 중...');
-    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // 스트림은 권한 확인용이므로 바로 정지
-    mediaStream.getTracks().forEach(t => t.stop());
-    mediaStream = null;
-
-    micGranted = true;
-    this.classList.add('granted');
-    document.getElementById('perm-label').textContent = '마이크 권한 허용됨 ✓';
-    setStatus('준비 완료 — 녹음 시작 버튼을 누르세요');
-    hideBanner();
-  } catch (e) {
-    showBanner('⚠ 마이크 권한이 거부되었습니다.<br>Chrome 주소창 왼쪽 🔒 → 마이크 → 허용 후 새로고침해 주세요.', 'err');
-    setStatus('마이크 권한 거부됨');
-  }
+/* ════════════ 탭 전환 ════════════ */
+document.getElementById('tab-mic').addEventListener('click', function(){
+  this.className = 'input-tab active-mic';
+  document.getElementById('tab-clova').className = 'input-tab';
+  document.getElementById('panel-mic').classList.add('active');
+  document.getElementById('panel-clova').classList.remove('active');
+});
+document.getElementById('tab-clova').addEventListener('click', function(){
+  this.className = 'input-tab active-clova';
+  document.getElementById('tab-mic').className = 'input-tab';
+  document.getElementById('panel-clova').classList.add('active');
+  document.getElementById('panel-mic').classList.remove('active');
+  setStatus('클로바노트 파일 불러오기 또는 텍스트 붙여넣기 후 적용하세요');
 });
 
-/* ════════════════════════════════
-   챕터 렌더
-════════════════════════════════ */
-function renderChapters() {
+/* ════════════ 챕터 ════════════ */
+function renderChapters(){
   const grid = document.getElementById('chapters-grid');
   grid.innerHTML = CHAPTERS.map(ch =>
     `<button class="chapter-btn" id="ch-btn-${ch.id}" data-id="${ch.id}">
@@ -319,256 +470,333 @@ function renderChapters() {
        <div class="ch-order" id="ch-order-${ch.id}"></div>
      </button>`
   ).join('');
-
-  // addEventListener 방식 (onclick 인라인 대신)
   grid.querySelectorAll('.chapter-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      toggleChapter(parseInt(this.dataset.id));
-    });
+    btn.addEventListener('click', function(){ toggleChapter(parseInt(this.dataset.id)); });
   });
 }
-
 document.getElementById('mode-single').addEventListener('click', () => setMode('single'));
 document.getElementById('mode-multi').addEventListener('click',  () => setMode('multi'));
-
-function setMode(m) {
+function setMode(m){
   mode = m; selected = [];
-  document.getElementById('mode-single').classList.toggle('active', m === 'single');
-  document.getElementById('mode-multi').classList.toggle('active',  m === 'multi');
+  document.getElementById('mode-single').classList.toggle('active', m==='single');
+  document.getElementById('mode-multi').classList.toggle('active',  m==='multi');
   updateChapterUI();
 }
-
-function toggleChapter(id) {
-  if (mode === 'single') {
-    selected = selected[0] === id ? [] : [id];
-  } else {
-    const i = selected.indexOf(id);
-    if (i === -1) selected.push(id); else selected.splice(i, 1);
-  }
+function toggleChapter(id){
+  if(mode==='single'){ selected = selected[0]===id ? [] : [id]; }
+  else{ const i=selected.indexOf(id); if(i===-1) selected.push(id); else selected.splice(i,1); }
   updateChapterUI();
 }
-
-function updateChapterUI() {
+function updateChapterUI(){
   CHAPTERS.forEach(ch => {
-    const btn = document.getElementById('ch-btn-' + ch.id);
-    const ord = document.getElementById('ch-order-' + ch.id);
+    const btn = document.getElementById('ch-btn-'+ch.id);
+    const ord = document.getElementById('ch-order-'+ch.id);
     const idx = selected.indexOf(ch.id);
     btn.classList.toggle('selected', idx !== -1);
-    ord.textContent = (idx !== -1 && mode === 'multi') ? (idx + 1) : '';
+    ord.textContent = (idx !== -1 && mode === 'multi') ? (idx+1) : '';
   });
-
   const box = document.getElementById('preview-box');
-  if (selected.length === 0) {
+  if(selected.length === 0){
     box.innerHTML = '<div class="preview-empty">챕터를 선택하면 원본이 자동으로 설정됩니다</div>';
-    document.getElementById('original').value = '';
-    return;
+    document.getElementById('original').value = ''; return;
   }
-  const combined = selected.map(id => CHAPTERS.find(c => c.id === id).text).join(' ');
+  const combined = selected.map(id => CHAPTERS.find(c=>c.id===id).text).join(' ');
   const chips = selected.map(id => {
-    const c = CHAPTERS.find(x => x.id === id);
+    const c = CHAPTERS.find(x=>x.id===id);
     return `<span class="preview-chip">${c.num} ${c.title}</span>`;
   }).join('');
-  box.innerHTML = `<div class="preview-chips">${chips}</div><div class="preview-snip">${combined.slice(0, 80)}…</div>`;
+  box.innerHTML = `<div class="preview-chips">${chips}</div><div class="preview-snip">${combined.slice(0,80)}…</div>`;
   document.getElementById('original').value = combined;
 }
 
-/* ════════════════════════════════
-   ② 녹음 버튼
-════════════════════════════════ */
-document.getElementById('btn-rec').addEventListener('click', function() {
-  if (!micGranted) {
+/* ════════════ 마이크 권한 ════════════ */
+document.getElementById('btn-permission').addEventListener('click', async function(){
+  try {
+    setStatus('마이크 권한 요청 중...');
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop());
+    micGranted = true;
+    this.classList.add('granted');
+    document.getElementById('perm-label').textContent = '마이크 권한 허용됨 ✓';
+    setStatus('준비 완료 — 녹음 시작 버튼을 누르세요');
+    hideBanner();
+  } catch(e) {
+    showBanner('⚠ 마이크 권한이 거부되었습니다.<br>Chrome 주소창 🔒 → 마이크 → 허용 후 새로고침해 주세요.', 'err');
+    setStatus('마이크 권한 거부됨');
+  }
+});
+
+/* ════════════ 마이크 녹음 ════════════ */
+document.getElementById('btn-rec').addEventListener('click', function(){
+  if(!micGranted){
     showBanner('⚠ 먼저 위의 <strong>마이크 권한 허용</strong> 버튼을 눌러 주세요.', 'warn');
-    setStatus('마이크 권한이 필요합니다');
     return;
   }
   isRecording ? stopRec() : startRec();
 });
 
-function startRec() {
+function startRec(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    showBanner('⚠ 음성 인식을 지원하지 않습니다. <strong>Chrome 브라우저</strong>를 사용해 주세요.', 'err');
-    return;
-  }
-
+  if(!SR){ showBanner('⚠ Chrome 브라우저를 사용해 주세요.', 'err'); return; }
   hideBanner();
+  // MediaRecorder로 음성 파일도 동시 녹음
+  audioChunks = []; audioBlob = null;
+  document.getElementById('btn-save-audio').disabled = true;
+  document.getElementById('btn-save-audio').classList.remove('ready');
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      audioBlob = new Blob(audioChunks, {type:'audio/webm'});
+      stream.getTracks().forEach(t=>t.stop());
+      const btn = document.getElementById('btn-save-audio');
+      btn.disabled = false; btn.classList.add('ready');
+    };
+    mediaRecorder.start();
+  }).catch(()=>{});
+
   recognition = new SR();
   recognition.lang = 'ko-KR';
-  recognition.continuous = false;      // 안드로이드 호환
+  recognition.continuous = false;
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
-
   let base = transcript;
 
-  recognition.onstart = function() {
+  recognition.onstart = () => {
     isRecording = true;
     document.getElementById('btn-rec').classList.add('recording');
-    document.getElementById('rec-label').textContent = '녹음 중지';
+    document.getElementById('rec-label').textContent = '녹음 중지 (탭하여 중지)';
     setStatus('● 녹음 중... 말씀하세요');
   };
-
-  recognition.onresult = function(e) {
-    let interim = '', final = base;
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+  recognition.onresult = (e) => {
+    let interim='', final=base;
+    for(let i=e.resultIndex; i<e.results.length; i++){
+      if(e.results[i].isFinal) final += e.results[i][0].transcript;
       else interim += e.results[i][0].transcript;
     }
     transcript = final;
-    document.getElementById('recorded').value = transcript + (interim ? ' (' + interim + ')' : '');
+    recordedText = transcript + interim;
+    updateRecordedPreview();
   };
-
-  recognition.onerror = function(e) {
-    if (e.error === 'no-speech' || e.error === 'audio-capture') return; // 무시 후 재시작
-    if (e.error === 'not-allowed') {
-      showBanner('⚠ 마이크 권한이 차단되었습니다. 브라우저 설정에서 마이크를 허용해 주세요.', 'err');
-      stopRec(); return;
-    }
-    setStatus('인식 오류: ' + e.error + ' — 재시도 중');
+  recognition.onerror = (e) => {
+    if(e.error==='no-speech' || e.error==='audio-capture') return;
+    if(e.error==='not-allowed'){ showBanner('⚠ 마이크 권한이 차단되었습니다.','err'); stopRec(); return; }
+    setStatus('인식 오류: '+e.error+' — 재시도 중');
   };
-
-  recognition.onend = function() {
-    // 안드로이드: onend 후 자동 재시작으로 연속 녹음
-    if (isRecording) {
-      base = transcript;
-      try { recognition.start(); } catch(err) { /* 이미 시작됨 */ }
-    }
+  recognition.onend = () => {
+    if(isRecording){ base=transcript; try{ recognition.start(); }catch(e){} }
   };
-
-  try {
-    recognition.start();
-  } catch(e) {
-    setStatus('녹음 시작 실패: ' + e.message);
-  }
+  try { recognition.start(); } catch(e){ setStatus('녹음 시작 실패: '+e.message); }
 }
 
-function stopRec() {
+function stopRec(){
   isRecording = false;
-  if (recognition) {
-    recognition.onend = null;
-    try { recognition.stop(); } catch(e) {}
-  }
+  if(recognition){ recognition.onend=null; try{ recognition.stop(); }catch(e){} }
+  if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
   document.getElementById('btn-rec').classList.remove('recording');
-  document.getElementById('rec-label').textContent = '녹음 시작';
-  document.getElementById('recorded').value = transcript;
-  setStatus('녹음 완료 ✓  —  비교 분석 버튼을 누르세요');
+  document.getElementById('rec-label').textContent = '② 녹음 시작';
+  recordedText = transcript;
+  updateRecordedPreview();
+  // 텍스트 저장 버튼 활성화
+  if(transcript.trim()){
+    const btn = document.getElementById('btn-save-txt');
+    btn.disabled = false; btn.classList.add('ready');
+  }
+  setStatus('녹음 완료 ✓ — 저장하거나 비교 분석 버튼을 누르세요');
 }
 
-/* ════════════════════════════════
-   기타 버튼
-════════════════════════════════ */
-document.getElementById('btn-clear-rec').addEventListener('click', function() {
-  if (isRecording) stopRec();
-  transcript = '';
-  document.getElementById('recorded').value = '';
-  setStatus('녹음 내용이 지워졌습니다');
+/* ════════════ 텍스트 저장 ════════════ */
+document.getElementById('btn-save-txt').addEventListener('click', function(){
+  if(!transcript.trim()){ alert('저장할 텍스트가 없습니다.'); return; }
+  const now = new Date();
+  const ts = now.getFullYear()+''+(now.getMonth()+1).toString().padStart(2,'0')+now.getDate().toString().padStart(2,'0')+'_'+now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0');
+  const filename = '녹음_' + ts + '.txt';
+  const blob = new Blob([transcript], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  setStatus('텍스트 파일이 저장되었습니다: ' + filename);
 });
 
-document.getElementById('btn-clear-all').addEventListener('click', function() {
-  if (isRecording) stopRec();
-  transcript = ''; selected = [];
-  document.getElementById('recorded').value = '';
+/* ════════════ 음성 저장 ════════════ */
+document.getElementById('btn-save-audio').addEventListener('click', function(){
+  if(!audioBlob){ alert('저장할 음성이 없습니다.'); return; }
+  const now = new Date();
+  const ts = now.getFullYear()+''+(now.getMonth()+1).toString().padStart(2,'0')+now.getDate().toString().padStart(2,'0')+'_'+now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0');
+  const filename = '녹음_' + ts + '.webm';
+  const url = URL.createObjectURL(audioBlob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  setStatus('음성 파일이 저장되었습니다: ' + filename);
+});
+
+/* ════════════ 클로바노트 파일 불러오기 ════════════ */
+document.getElementById('btn-file-upload').addEventListener('click', function(){
+  document.getElementById('clova-file-input').click();
+});
+
+document.getElementById('clova-file-input').addEventListener('change', function(){
+  const file = this.files[0];
+  if(!file) return;
+  if(file.size > 5 * 1024 * 1024){
+    showBanner('⚠ 파일이 너무 큽니다 (5MB 이하만 가능)', 'err'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const text = e.target.result;
+    document.getElementById('clova-paste').value = text;
+    const tag = document.getElementById('file-name-tag');
+    tag.textContent = '📄 ' + file.name;
+    tag.style.display = 'block';
+    showBanner('✓ 파일을 불러왔습니다. 아래 <strong>적용하기</strong> 버튼을 누르세요.', 'ok');
+    setStatus('파일 불러오기 완료 — 적용 버튼을 누르세요');
+  };
+  reader.onerror = function(){
+    showBanner('⚠ 파일을 읽을 수 없습니다. txt 파일인지 확인해 주세요.', 'err');
+  };
+  reader.readAsText(file, 'UTF-8');
+  this.value = '';
+});
+
+/* ════════════ 클로바노트 텍스트 적용 ════════════ */
+document.getElementById('btn-clova-apply').addEventListener('click', function(){
+  const pasted = document.getElementById('clova-paste').value.trim();
+  if(!pasted){ showBanner('⚠ 내용이 없습니다. 파일을 불러오거나 텍스트를 붙여넣으세요.', 'warn'); return; }
+  let cleaned = pasted
+    .replace(/\[\d{2}:\d{2}(:\d{2})?\]/g, '')
+    .replace(/^.+?:\s*/gm, '')
+    .replace(/\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  recordedText = cleaned;
+  transcript = cleaned;
+  updateRecordedPreview();
+  hideBanner();
+  showBanner('✓ 텍스트가 적용되었습니다. 비교 분석 버튼을 누르세요.', 'ok');
+  setStatus('클로바노트 텍스트 적용 완료 ✓');
+});
+
+/* ════════════ 지우기 / 초기화 ════════════ */
+document.getElementById('btn-clear-rec').addEventListener('click', function(){
+  if(isRecording) stopRec();
+  transcript = ''; recordedText = ''; audioBlob = null; audioChunks = [];
+  document.getElementById('clova-paste').value = '';
+  document.getElementById('file-name-tag').style.display = 'none';
+  document.getElementById('btn-save-txt').disabled = true;
+  document.getElementById('btn-save-txt').classList.remove('ready');
+  document.getElementById('btn-save-audio').disabled = true;
+  document.getElementById('btn-save-audio').classList.remove('ready');
+  updateRecordedPreview();
+  hideBanner();
+  setStatus('녹음 내용이 지워졌습니다');
+});
+document.getElementById('btn-clear-all').addEventListener('click', function(){
+  if(isRecording) stopRec();
+  transcript = ''; recordedText = ''; selected = []; audioBlob = null; audioChunks = [];
+  document.getElementById('clova-paste').value = '';
+  document.getElementById('file-name-tag').style.display = 'none';
+  document.getElementById('btn-save-txt').disabled = true;
+  document.getElementById('btn-save-txt').classList.remove('ready');
+  document.getElementById('btn-save-audio').disabled = true;
+  document.getElementById('btn-save-audio').classList.remove('ready');
   document.getElementById('result-area').innerHTML =
     '<div class="result-panel"><div class="empty-state">비교 분석 결과가 여기에 표시됩니다</div></div>';
   updateChapterUI();
+  updateRecordedPreview();
+  hideBanner();
   setStatus('초기화 완료');
 });
-
 document.getElementById('btn-analyze').addEventListener('click', compare);
 
-/* ════════════════════════════════
-   비교 로직
-════════════════════════════════ */
-function esc(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+/* ════════════ 비교 로직 ════════════ */
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function splitSentences(raw) {
-  const sents = raw.split(/(?<=[.?!。？！])\s+/).map(s => s.trim()).filter(Boolean);
-  const wordList = [], wordSentIdx = [];
-  sents.forEach((s, si) => {
-    s.replace(/[.,?!，。？！""''「」『』()（）[\]]/g, '')
-     .replace(/\s+/g, ' ').trim().toLowerCase()
+function splitSentences(raw){
+  const sents = raw.split(/(?<=[.?!。？！])\s+/).map(s=>s.trim()).filter(Boolean);
+  const wordList=[], wordSentIdx=[];
+  sents.forEach((s,si)=>{
+    s.replace(/[.,?!，。？！""''「」『』()（）[\]]/g,'')
+     .replace(/\s+/g,' ').trim().toLowerCase()
      .split(' ').filter(Boolean)
-     .forEach(w => { wordList.push(w); wordSentIdx.push(si); });
+     .forEach(w=>{ wordList.push(w); wordSentIdx.push(si); });
   });
   return { wordList, wordSentIdx };
 }
 
-function normWords(s) {
-  return s.replace(/[.,?!，。？！""''「」『』()（）[\]]/g, '')
-          .replace(/\s+/g, ' ').trim().toLowerCase()
+function normWords(s){
+  return s.replace(/[.,?!，。？！""''「」『』()（）[\]]/g,'')
+          .replace(/\s+/g,' ').trim().toLowerCase()
           .split(' ').filter(Boolean);
 }
 
-function lcsOps(a, b) {
-  const m = a.length, n = b.length;
-  const dp = Array.from({length: m+1}, () => new Array(n+1).fill(0));
-  for (let i = 1; i <= m; i++)
-    for (let j = 1; j <= n; j++)
-      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1]+1 : Math.max(dp[i-1][j], dp[i][j-1]);
-  let i = m, j = n;
-  const ops = [];
-  while (i > 0 || j > 0) {
-    if (i > 0 && j > 0 && a[i-1] === b[j-1]) { ops.unshift({t:'ok',  aw:a[i-1], bw:b[j-1]}); i--; j--; }
-    else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) { ops.unshift({t:'extra', bw:b[j-1]}); j--; }
-    else { ops.unshift({t:'miss', aw:a[i-1]}); i--; }
+function lcsOps(a,b){
+  const m=a.length, n=b.length;
+  const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]+1:Math.max(dp[i-1][j],dp[i][j-1]);
+  let i=m,j=n; const ops=[];
+  while(i>0||j>0){
+    if(i>0&&j>0&&a[i-1]===b[j-1]){ ops.unshift({t:'ok',aw:a[i-1],bw:b[j-1]}); i--;j--; }
+    else if(j>0&&(i===0||dp[i][j-1]>=dp[i-1][j])){ ops.unshift({t:'extra',bw:b[j-1]}); j--; }
+    else{ ops.unshift({t:'miss',aw:a[i-1]}); i--; }
   }
   return ops;
 }
 
-function mergeOps(ops) {
-  const merged = [];
-  for (let k = 0; k < ops.length; ) {
-    if (ops[k].t === 'miss' && ops[k+1] && ops[k+1].t === 'extra') {
-      merged.push({t:'sub', aw:ops[k].aw, bw:ops[k+1].bw}); k += 2;
+function mergeOps(ops){
+  const merged=[];
+  for(let k=0;k<ops.length;){
+    if(ops[k].t==='miss'&&ops[k+1]&&ops[k+1].t==='extra'){
+      merged.push({t:'sub',aw:ops[k].aw,bw:ops[k+1].bw}); k+=2;
     } else { merged.push(ops[k]); k++; }
   }
   return merged;
 }
 
-function compare() {
-  if (isRecording) stopRec();
+function compare(){
+  if(isRecording) stopRec();
   const origRaw = document.getElementById('original').value.trim();
-  const recRaw  = document.getElementById('recorded').value.trim() || transcript.trim();
-  if (!origRaw) { alert('원본 텍스트를 선택하거나 입력해 주세요.'); return; }
-  if (!recRaw)  { alert('녹음 텍스트가 없습니다.'); return; }
+  const recRaw  = recordedText.trim();
+  if(!origRaw){ alert('원본 텍스트를 선택하거나 입력해 주세요.'); return; }
+  if(!recRaw) { alert('녹음 텍스트가 없습니다.\n마이크 녹음 또는 클로바노트 파일/붙여넣기를 먼저 해주세요.'); return; }
 
-  const { wordList: origWords, wordSentIdx } = splitSentences(origRaw);
+  const {wordList:origWords, wordSentIdx} = splitSentences(origRaw);
   const recWords = normWords(recRaw);
   const ops = mergeOps(lcsOps(origWords, recWords));
 
   let correct=0, missing=0, extra=0, sub=0;
-  ops.forEach(o => {
-    if(o.t==='ok') correct++; else if(o.t==='miss') missing++;
-    else if(o.t==='extra') extra++; else sub++;
-  });
-  const accuracy = Math.round(correct / Math.max(origWords.length, 1) * 100);
+  ops.forEach(o=>{ if(o.t==='ok')correct++; else if(o.t==='miss')missing++; else if(o.t==='extra')extra++; else sub++; });
+  const accuracy = Math.round(correct/Math.max(origWords.length,1)*100);
 
-  const BR = '<br style="display:block;margin:5px 0 1px;">';
-  let origPtr = 0, lastSI = -1, lH = '', rH = '';
-  ops.forEach(o => {
-    if (o.t !== 'extra') {
-      const si = wordSentIdx[origPtr] !== undefined ? wordSentIdx[origPtr] : lastSI;
-      if (si !== lastSI && lastSI !== -1) { lH += BR; rH += BR; }
-      lastSI = si; origPtr++;
+  const BR='<br style="display:block;margin:5px 0 1px;">';
+  let origPtr=0, lastSI=-1, lH='', rH='';
+  ops.forEach(o=>{
+    if(o.t!=='extra'){
+      const si = wordSentIdx[origPtr]!==undefined ? wordSentIdx[origPtr] : lastSI;
+      if(si!==lastSI && lastSI!==-1){ lH+=BR; rH+=BR; }
+      lastSI=si; origPtr++;
     }
-    if      (o.t==='ok')    { lH+=`<span class="w w-ok">${esc(o.aw)}</span>`;   rH+=`<span class="w w-ok">${esc(o.bw)}</span>`; }
-    else if (o.t==='miss')  { lH+=`<span class="w w-miss">${esc(o.aw)}</span>`; rH+=`<span class="w w-ph">—</span>`; }
-    else if (o.t==='extra') { lH+=`<span class="w w-ph">—</span>`;              rH+=`<span class="w w-extra">${esc(o.bw)}</span>`; }
-    else                    { lH+=`<span class="w w-sub">${esc(o.aw)}</span>`;  rH+=`<span class="w w-sub">${esc(o.bw)}</span>`; }
+    if     (o.t==='ok')   { lH+=`<span class="w w-ok">${esc(o.aw)}</span>`;   rH+=`<span class="w w-ok">${esc(o.bw)}</span>`; }
+    else if(o.t==='miss') { lH+=`<span class="w w-miss">${esc(o.aw)}</span>`; rH+=`<span class="w w-ph">—</span>`; }
+    else if(o.t==='extra'){ lH+=`<span class="w w-ph">—</span>`;              rH+=`<span class="w w-extra">${esc(o.bw)}</span>`; }
+    else                  { lH+=`<span class="w w-sub">${esc(o.aw)}</span>`;  rH+=`<span class="w w-sub">${esc(o.bw)}</span>`; }
   });
 
-  let grade, sc, gd;
-  if      (accuracy >= 95) { grade='완벽'; sc='#4ade80'; gd='거의 완벽하게 일치합니다!'; }
-  else if (accuracy >= 80) { grade='우수'; sc='#60a5fa'; gd='대부분 일치합니다.'; }
-  else if (accuracy >= 60) { grade='보통'; sc='#fbbf24'; gd='절반 이상 일치합니다.'; }
-  else                     { grade='미흡'; sc='#f87171'; gd='많은 부분이 다릅니다.'; }
-  const bc = accuracy>=95?'#4ade80':accuracy>=80?'#60a5fa':accuracy>=60?'#fbbf24':'#f87171';
-  const chInfo = selected.length > 0
-    ? selected.map(id => { const c = CHAPTERS.find(x => x.id===id); return c.num+' '+c.title; }).join(' + ')
+  let grade,sc,gd;
+  if     (accuracy>=95){grade='완벽';sc='#4ade80';gd='거의 완벽하게 일치합니다!';}
+  else if(accuracy>=80){grade='우수';sc='#60a5fa';gd='대부분 일치합니다.';}
+  else if(accuracy>=60){grade='보통';sc='#fbbf24';gd='절반 이상 일치합니다.';}
+  else                 {grade='미흡';sc='#f87171';gd='많은 부분이 다릅니다.';}
+  const bc=accuracy>=95?'#4ade80':accuracy>=80?'#60a5fa':accuracy>=60?'#fbbf24':'#f87171';
+  const chInfo=selected.length>0
+    ? selected.map(id=>{const c=CHAPTERS.find(x=>x.id===id);return c.num+' '+c.title;}).join(' + ')
     : '직접 입력';
 
-  document.getElementById('result-area').innerHTML = `
+  document.getElementById('result-area').innerHTML=`
     <div class="result-panel">
       <div class="score-bar">
         <div class="score-top">
@@ -580,42 +808,32 @@ function compare() {
           </div>
         </div>
         <div class="stats-row">
-          <div class="stat-chip" style="background:var(--green-bg);border-color:var(--green-border);color:var(--green);">
-            <span class="stat-num">${correct}</span><span class="stat-lbl">일치</span></div>
-          <div class="stat-chip" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red);">
-            <span class="stat-num">${missing}</span><span class="stat-lbl">누락</span></div>
-          <div class="stat-chip" style="background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber);">
-            <span class="stat-num">${extra}</span><span class="stat-lbl">추가</span></div>
-          <div class="stat-chip" style="background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue);">
-            <span class="stat-num">${sub}</span><span class="stat-lbl">대체</span></div>
+          <div class="stat-chip" style="background:var(--green-bg);border-color:var(--green-border);color:var(--green);"><span class="stat-num">${correct}</span><span class="stat-lbl">일치</span></div>
+          <div class="stat-chip" style="background:var(--red-bg);border-color:var(--red-border);color:var(--red);"><span class="stat-num">${missing}</span><span class="stat-lbl">누락</span></div>
+          <div class="stat-chip" style="background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber);"><span class="stat-num">${extra}</span><span class="stat-lbl">추가</span></div>
+          <div class="stat-chip" style="background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue);"><span class="stat-num">${sub}</span><span class="stat-lbl">대체</span></div>
         </div>
       </div>
       <div class="diff-section">
         <div class="diff-block">
           <div class="diff-block-title">원본 텍스트</div>
-          <div class="diff-content">${lH || '<span style="color:var(--text-dim);">내용 없음</span>'}</div>
+          <div class="diff-content">${lH||'<span style="color:var(--text-dim);">내용 없음</span>'}</div>
         </div>
         <div class="diff-block">
           <div class="diff-block-title">녹음 텍스트</div>
-          <div class="diff-content">${rH || '<span style="color:var(--text-dim);">내용 없음</span>'}</div>
+          <div class="diff-content">${rH||'<span style="color:var(--text-dim);">내용 없음</span>'}</div>
         </div>
       </div>
       <div class="progress-wrap">
         <div class="progress-label"><span>일치율</span><span>${accuracy}%</span></div>
-        <div class="progress-track">
-          <div class="progress-fill" style="width:${accuracy}%;background:${bc};"></div>
-        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:${accuracy}%;background:${bc};"></div></div>
       </div>
     </div>`;
 
-  setTimeout(() => {
-    document.getElementById('result-area').scrollIntoView({ behavior:'smooth', block:'start' });
-  }, 150);
+  setTimeout(()=>document.getElementById('result-area').scrollIntoView({behavior:'smooth',block:'start'}),150);
 }
 
-/* ════════════════════════════════
-   초기화
-════════════════════════════════ */
+/* ════════════ 초기화 ════════════ */
 renderChapters();
 </script>
 </body>
