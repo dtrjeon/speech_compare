@@ -1247,7 +1247,31 @@ document.getElementById('clova-file-input').addEventListener('change', function(
 document.getElementById('btn-clova-apply').addEventListener('click', function(){
   const pasted = document.getElementById('clova-paste').value.trim();
   if(!pasted){ showBanner('⚠ 내용이 없습니다. 파일을 불러오거나 텍스트를 붙여넣으세요.', 'warn'); return; }
-  let cleaned = pasted
+  // 1) BOM 제거 및 줄 분리
+  let lines = pasted.replace(/^\uFEFF/, '').split(/\r?\n/);
+
+  // 2) 앞부분 정리: 첫 3줄 제거 후 빈줄 건너뛰고 첫 본문 찾기
+  lines = lines.slice(3); // 앞 3줄 삭제
+  // 빈줄 이후 첫 내용부터 시작 (참석자 N 같은 헤더 포함 가능)
+  let startIdx = 0;
+  for(let i = 0; i < lines.length; i++){
+    if(lines[i].trim() === ''){ startIdx = i + 1; } else { break; }
+  }
+  lines = lines.slice(startIdx);
+
+  // 3) 참석자 N 형태 헤더 줄 제거
+  lines = lines.filter(l => !/^참석자\s*\d+\s*$/.test(l.trim()));
+
+  // 4) 마지막 영문(URL, 영문만으로 구성된 줄) 제거
+  while(lines.length > 0){
+    const last = lines[lines.length - 1].trim();
+    if(last === '' || /^[a-zA-Z0-9\s./:_\-@]+$/.test(last)){
+      lines.pop();
+    } else { break; }
+  }
+
+  // 5) 타임스탬프·화자 라벨 제거 후 합치기
+  let cleaned = lines.join(' ')
     .replace(/\[\d{2}:\d{2}(:\d{2})?\]/g, '')
     .replace(/^.+?:\s*/gm, '')
     .replace(/\n+/g, ' ')
