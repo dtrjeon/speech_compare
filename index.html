@@ -696,57 +696,67 @@ function startRec(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){ showBanner('⚠ Chrome 브라우저를 사용해 주세요.', 'err'); return; }
   hideBanner();
-  // MediaRecorder — 기기 지원 형식 자동 감지 (m4a → webm opus → webm → ogg)
+
   audioChunks = []; audioBlob = null; audioMime = ''; audioExt = 'webm';
   document.getElementById('btn-save-audio').disabled = true;
   document.getElementById('btn-save-audio').classList.remove('ready');
   document.getElementById('btn-print').disabled = true;
   document.getElementById('btn-print').classList.remove('ready');
 
-  const _candidates = [
-    { mime: 'audio/mp4',              ext: 'm4a'  },
-    { mime: 'audio/webm;codecs=opus', ext: 'webm' },
-    { mime: 'audio/webm',             ext: 'webm' },
-    { mime: 'audio/ogg;codecs=opus',  ext: 'ogg'  },
-  ];
-  const _supported = _candidates.find(c => {
-    try { return MediaRecorder.isTypeSupported(c.mime); } catch(e){ return false; }
-  });
-
-  navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
-    let _options = {};
-    if(_supported){ _options = {mimeType: _supported.mime}; audioMime = _supported.mime; audioExt = _supported.ext; }
-    try {
-      mediaRecorder = new MediaRecorder(stream, _options);
-    } catch(e) {
-      mediaRecorder = new MediaRecorder(stream);
-      audioMime = ''; audioExt = 'webm';
-    }
-    mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      const _type = audioMime || 'audio/webm';
-      audioBlob = new Blob(audioChunks, {type: _type});
-      stream.getTracks().forEach(t=>t.stop());
-      const btn = document.getElementById('btn-save-audio');
-      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> 음성 저장 (.' + audioExt + ')';
-      btn.disabled = false; btn.classList.add('ready');
-    };
-    mediaRecorder.start();
-  }).catch(()=>{ setStatus('마이크 스트림 오류 — 권한을 확인해 주세요'); });
-
+  // 안드로이드: STT 를 먼저 시작하고, onstart 이후에 MediaRecorder 시작
+  // (동시에 getUserMedia 호출 시 STT 가 마이크를 못 잡는 충돌 방지)
   recognition = new SR();
   recognition.lang = 'ko-KR';
   recognition.continuous = false;
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
   let base = transcript;
+  let mediaStarted = false;
 
   recognition.onstart = () => {
     isRecording = true;
     document.getElementById('btn-rec').classList.add('recording');
     document.getElementById('rec-label').textContent = '녹음 중지 (탭하여 중지)';
     setStatus('● 녹음 중... 말씀하세요');
+
+    // STT 가 마이크를 잡은 후 MediaRecorder 시작 (한 번만)
+    if(!mediaStarted){
+      mediaStarted = true;
+      const _candidates = [
+        { mime: 'audio/mp4',              ext: 'm4a'  },
+        { mime: 'audio/webm;codecs=opus', ext: 'webm' },
+        { mime: 'audio/webm',             ext: 'webm' },
+        { mime: 'audio/ogg;codecs=opus',  ext: 'ogg'  },
+      ];
+      const _supported = _candidates.find(c => {
+        try { return MediaRecorder.isTypeSupported(c.mime); } catch(e){ return false; }
+      });
+      navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
+        let _options = {};
+        if(_supported){ _options = {mimeType: _supported.mime}; audioMime = _supported.mime; audioExt = _supported.ext; }
+        try {
+          mediaRecorder = new MediaRecorder(stream, _options);
+        } catch(e) {
+          mediaRecorder = new MediaRecorder(stream);
+          audioMime = ''; audioExt = 'webm';
+        }
+        mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
+        mediaRecorder.onstop = () => {
+          const _type = audioMime || 'audio/webm';
+          audioBlob = new Blob(audioChunks, {type: _type});
+          stream.getTracks().forEach(t => t.stop());
+          const btn = document.getElementById('btn-save-audio');
+          btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> 음성 저장 (.' + audioExt + ')';
+          btn.disabled = false; btn.classList.add('ready');
+        };
+        mediaRecorder.start();
+      }).catch(()=>{
+        // MediaRecorder 실패해도 STT 는 계속 동작 — 음성저장만 안 됨
+        setStatus('● 녹음 중... (음성파일 저장 불가, 텍스트만 저장됩니다)');
+      });
+    }
   };
+
   recognition.onresult = (e) => {
     let interim='', final=base;
     for(let i=e.resultIndex; i<e.results.length; i++){
@@ -754,18 +764,20 @@ function startRec(){
       else interim += e.results[i][0].transcript;
     }
     transcript = final;
-    // 항상 recordedText 동기화 (interim 포함)
     recordedText = transcript + interim;
     updateRecordedPreview();
   };
+
   recognition.onerror = (e) => {
     if(e.error==='no-speech' || e.error==='audio-capture') return;
     if(e.error==='not-allowed'){ showBanner('⚠ 마이크 권한이 차단되었습니다.','err'); stopRec(); return; }
     setStatus('인식 오류: '+e.error+' — 재시도 중');
   };
+
   recognition.onend = () => {
     if(isRecording){ base=transcript; try{ recognition.start(); }catch(e){} }
   };
+
   try { recognition.start(); } catch(e){ setStatus('녹음 시작 실패: '+e.message); }
 }
 
