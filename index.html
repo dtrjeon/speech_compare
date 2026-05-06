@@ -25,7 +25,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .page{max-width:480px;margin:0 auto;padding:20px 16px 48px;}
 
 /* Header */
-.header{margin-bottom:22px;}
+.header{margin-bottom:22px;position:relative;}
 .tag{display:inline-block;font-size:10px;letter-spacing:.12em;color:var(--accent);border:1px solid var(--accent-glow);background:var(--accent-glow);padding:3px 10px;border-radius:20px;margin-bottom:10px;text-transform:uppercase;}
 h1{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.2;}
 .subtitle{margin-top:6px;font-size:13px;color:var(--text-muted);}
@@ -629,6 +629,7 @@ textarea::placeholder{color:var(--text-dim);}
     <div class="tag">전도폭발훈련 · 전문 구두점검</div>
     <h1>전문 구두 점검</h1>
     <p class="subtitle">전도폭발훈련</p>
+    <div style="position:absolute;top:20px;right:16px;font-size:10px;color:var(--text-dim);letter-spacing:.04em;">v2026.05.06 23:18</div>
   </div>
 
   <div id="banner" class="banner"></div>
@@ -1018,6 +1019,8 @@ function startRec(){
   document.getElementById('btn-save-audio').classList.remove('ready');
   document.getElementById('btn-print').disabled = true;
   document.getElementById('btn-print').classList.remove('ready');
+  document.getElementById('btn-preview').disabled = true;
+  document.getElementById('btn-preview').classList.remove('ready');
 
   // ── Whisper 모드: MediaRecorder 만 시작 (STT 없이 음성파일만 녹음) ──
   if(recMode === 'api'){
@@ -1342,23 +1345,29 @@ document.getElementById('btn-analyze').addEventListener('click', compare);
 /* ════════════ 비교 로직 ════════════ */
 function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// 구두점 제거 공통 함수
+function stripPunct(s){
+  return s.replace(/[.,?!，。？！“”‘’「」『』()（）[\]]/g,'')
+          .replace(/\s+/g,' ').trim().toLowerCase();
+}
+
 function splitSentences(raw){
-  // lookbehind 대신 안드로이드 호환 방식으로 문장 분리
-  const sents = raw.replace(/([.?!。？！])\s+/g, '$1 ').split(' ').map(s=>s.trim()).filter(Boolean);
+  // 문장 부호 뒤 공백/줄끝을 기준으로 문장 분리
+  const sents = raw
+    .replace(/([.?!。？！])([\s])/g, '$1\n')
+    .split('\n')
+    .map(s => s.trim())
+    .filter(Boolean);
   const wordList=[], wordSentIdx=[];
   sents.forEach((s,si)=>{
-    s.replace(/[.,?!，。？！""''「」『』()（）[\]]/g,'')
-     .replace(/\s+/g,' ').trim().toLowerCase()
-     .split(' ').filter(Boolean)
-     .forEach(w=>{ wordList.push(w); wordSentIdx.push(si); });
+    stripPunct(s).split(' ').filter(Boolean)
+      .forEach(w=>{ wordList.push(w); wordSentIdx.push(si); });
   });
   return { wordList, wordSentIdx };
 }
 
 function normWords(s){
-  return s.replace(/[.,?!，。？！""''「」『』()（）[\]]/g,'')
-          .replace(/\s+/g,' ').trim().toLowerCase()
-          .split(' ').filter(Boolean);
+  return stripPunct(s).split(' ').filter(Boolean);
 }
 
 function lcsOps(a,b){
@@ -1499,6 +1508,9 @@ function applyRecMode(mode){
   // 제목/설명 업데이트
   document.getElementById('rec-mode-title').textContent = isApi ? '① 🤖 Whisper API' : '① 🎙️ 실시간 STT';
   document.getElementById('rec-mode-desc').textContent  = isApi ? '정확도 높음' : '브라우저 내장 (무료, Chrome 권장)';
+  // 토글 라벨 색상 업데이트
+  document.getElementById('toggle-lbl-api').style.opacity = isApi ? '1' : '0.4';
+  document.getElementById('toggle-lbl-stt').style.opacity = isApi ? '0.4' : '1';
   // 패널 표시
   document.getElementById('panel-rec-api').classList.toggle('active', isApi);
   document.getElementById('panel-rec-stt').classList.toggle('active', !isApi);
@@ -1798,7 +1810,6 @@ document.getElementById('btn-print').addEventListener('click', function(){
 
 renderChapters();
 </script>
-
 <!-- ════════════ 미리보기 모달 ════════════ -->
 <div class="preview-modal" id="preview-modal">
   <div class="preview-toolbar">
@@ -1812,5 +1823,6 @@ renderChapters();
     <!-- 동적으로 채워짐 -->
   </div>
 </div>
+
 </body>
 </html>
