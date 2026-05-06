@@ -28,7 +28,6 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .header{margin-bottom:22px;}
 .tag{display:inline-block;font-size:10px;letter-spacing:.12em;color:var(--accent);border:1px solid var(--accent-glow);background:var(--accent-glow);padding:3px 10px;border-radius:20px;margin-bottom:10px;text-transform:uppercase;}
 h1{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.2;}
-h1 span{color:var(--accent);}
 .subtitle{margin-top:6px;font-size:13px;color:var(--text-muted);}
 .slabel{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;}
 
@@ -125,6 +124,9 @@ textarea::placeholder{color:var(--text-dim);}
 .btn-save:active{background:var(--border);}
 .btn-save.ready{border-color:var(--green-border);background:var(--green-bg);color:var(--green);}
 .btn-save[disabled]{opacity:.3;cursor:not-allowed;}
+.btn-print{width:100%;margin-bottom:8px;}
+.btn-preview-wrap{display:flex;gap:8px;margin-bottom:8px;}
+.btn-preview-wrap .btn-save{flex:1;min-height:46px;border-radius:10px;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
 /* 클로바노트 패널 */
@@ -267,7 +269,8 @@ textarea::placeholder{color:var(--text-dim);}
   .header, .chapter-section, .input-card, .input-mode-card,
   .recorded-preview, .bottom-btns, .legend,
   .result-panel .score-bar .stats-row,
-  #banner, .btn-print, .page > *:not(#result-area) { display: none !important; }
+  #banner, .btn-print, .preview-modal,
+  .page > *:not(#result-area) { display: none !important; }
 
   #result-area { display: block !important; }
   .result-panel { border: none !important; border-radius: 0 !important; box-shadow: none !important; }
@@ -386,6 +389,125 @@ textarea::placeholder{color:var(--text-dim);}
   .progress-fill  { border-radius: 1.5mm !important; }
 }
 
+
+/* ════════════ 미리보기 모달 ════════════ */
+.preview-modal{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.7);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.preview-modal.open{ display:block; }
+.preview-toolbar{
+  position:sticky;top:0;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#1a1a1a;padding:10px 16px;gap:10px;
+  border-bottom:1px solid #333;
+}
+.preview-toolbar-title{font-size:14px;font-weight:500;color:#fff;}
+.preview-toolbar-btns{display:flex;gap:8px;}
+.preview-toolbar-btn{
+  padding:7px 16px;border-radius:8px;border:none;
+  font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:500;
+  cursor:pointer;touch-action:manipulation;
+}
+.preview-toolbar-btn.print{background:#7c6aff;color:#fff;}
+.preview-toolbar-btn.close{background:#333;color:#ccc;}
+
+/* A4 용지 */
+.preview-a4{
+  width:210mm;min-height:297mm;
+  background:#fff;color:#000;
+  margin:16px auto;
+  padding:15mm 12mm;
+  box-shadow:0 4px 24px rgba(0,0,0,.4);
+  font-family:'Noto Sans KR',sans-serif;
+  font-size:10pt;
+  box-sizing:border-box;
+}
+@media screen and (max-width:600px){
+  .preview-a4{
+    width:100%;min-height:auto;
+    margin:0;border-radius:0;
+    padding:12mm 8mm;
+  }
+}
+
+/* 미리보기 머리글 */
+.pv-header{border-bottom:2pt solid #000;padding-bottom:3mm;margin-bottom:3mm;}
+.pv-title{font-size:14pt;font-weight:700;margin-bottom:1.5mm;}
+.pv-meta{font-size:9pt;color:#555;margin-bottom:2mm;}
+.pv-legend{
+  display:flex;gap:8mm;flex-wrap:wrap;
+  font-size:8.5pt;color:#333;
+  border:0.5pt solid #ccc;padding:1.5mm 3mm;
+  border-radius:1mm;background:#f9f9f9;
+}
+.pv-legend-item{display:flex;align-items:center;gap:1.5mm;}
+
+/* 점수 바 */
+.pv-score{
+  display:flex;align-items:center;gap:4mm;
+  background:#f5f5f5;border:0.5pt solid #ccc;
+  border-radius:2mm;padding:3mm 4mm;margin-bottom:4mm;
+}
+.pv-score-num{font-size:26pt;font-weight:900;line-height:1;min-width:18mm;}
+.pv-score-grade{font-size:13pt;font-weight:700;}
+.pv-score-desc{font-size:9pt;color:#555;margin-top:1mm;}
+.pv-score-chapter{font-size:8pt;color:#888;margin-bottom:1mm;}
+
+/* 2단 비교 */
+.pv-subtitle{font-size:10pt;color:#444;margin-bottom:1mm;}
+/* 표 형식 */
+.pv-table{border:0.5pt solid #bbb;border-radius:2mm;overflow:hidden;}
+.pv-table-header{
+  display:grid;grid-template-columns:1fr 1fr;
+  background:#f0f0f0;border-bottom:1pt solid #bbb;
+}
+.pv-th{
+  padding:2mm 3mm;font-size:8pt;font-weight:700;
+  color:#333;letter-spacing:.06em;text-transform:uppercase;
+}
+.pv-th:first-child{border-right:0.5pt solid #bbb;}
+.pv-row{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-bottom:0.5pt solid #e0e0e0;
+}
+.pv-row:last-child{border-bottom:none;}
+.pv-cell{
+  display:flex;align-items:flex-start;gap:2mm;
+  padding:3mm 3mm;
+  font-size:10.5pt;line-height:1.9;word-break:keep-all;
+}
+.pv-orig{border-right:0.5pt solid #bbb;}
+.pv-num{
+  font-size:8pt;font-weight:700;min-width:5mm;
+  padding-top:1mm;flex-shrink:0;
+  font-variant-numeric:tabular-nums;
+}
+.pv-words{flex:1;}
+.pv-leg-sample{
+  display:inline-block;border-radius:3px;
+  padding:0 4px;font-size:8pt;
+}
+
+/* 미리보기 단어 색상 */
+.pw{display:inline-block;border-radius:3px;padding:0 4px;margin:1px 2px;font-size:10pt;}
+.pw-ok{color:#000;}
+.pw-miss{background:#fff0f0;border:1px solid #ff4444;color:#cc0000;text-decoration:line-through;}
+.pw-extra{background:#f0f4ff;border:1px solid #4466ff;color:#0033cc;}
+.pw-sub{background:#f8f0ff;border:1px solid #8833cc;color:#6600aa;}
+.pw-ph{color:#bbb;font-size:8pt;}
+
+/* 일치율 바 */
+.pv-progress-wrap{
+  padding:2mm 4mm;border-top:0.5pt solid #ccc;
+  background:#f9f9f9;border-bottom-left-radius:1mm;border-bottom-right-radius:1mm;
+}
+.pv-progress-label{display:flex;justify-content:space-between;font-size:8pt;color:#555;margin-bottom:1.5mm;}
+.pv-progress-track{height:3mm;background:#ddd;border-radius:1.5mm;overflow:hidden;}
+.pv-progress-fill{height:100%;border-radius:1.5mm;}
+
 /* 화면에서는 프린트 전용 요소 숨기기 */
 .print-header, .print-legend { display: none; }
 </style>
@@ -395,8 +517,8 @@ textarea::placeholder{color:var(--text-dim);}
 
   <div class="header">
     <div class="tag">전도폭발훈련 · 전문 구두점검</div>
-    <h1>전도폭발훈련<br><span>전문 구두점검</span></h1>
-    <p class="subtitle">챕터를 선택하고 마이크 또는 클로바노트로 비교하세요</p>
+    <h1>전문 구두 점검</h1>
+    <p class="subtitle">전도폭발훈련</p>
   </div>
 
   <div id="banner" class="banner"></div>
@@ -524,14 +646,23 @@ textarea::placeholder{color:var(--text-dim);}
       </svg>
       비교 분석
     </button>
-    <button class="btn-save btn-print" id="btn-print" disabled style="width:100%;min-height:46px;border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="6 9 6 2 18 2 18 9"/>
-        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-        <rect x="6" y="14" width="12" height="8"/>
-      </svg>
-      프린트 출력 (좌우 비교)
-    </button>
+    <div class="btn-preview-wrap">
+      <button class="btn-save btn-preview" id="btn-preview" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        미리보기 (A4)
+      </button>
+      <button class="btn-save btn-print" id="btn-print" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        프린트 출력
+      </button>
+    </div>
     <div class="btn-row2">
       <button class="btn-sm" id="btn-clear-rec">녹음 지우기</button>
       <button class="btn-sm" id="btn-clear-all">전체 초기화</button>
@@ -551,6 +682,18 @@ textarea::placeholder{color:var(--text-dim);}
     <div class="result-panel"><div class="empty-state">비교 분석 결과가 여기에 표시됩니다</div></div>
   </div>
 
+</div>
+
+<!-- ════ 미리보기 모달 ════ -->
+<div class="preview-modal" id="preview-modal">
+  <div class="preview-toolbar">
+    <span class="preview-toolbar-title">📄 A4 미리보기</span>
+    <div class="preview-toolbar-btns">
+      <button class="preview-toolbar-btn print" id="preview-print-btn">🖨️ 프린트</button>
+      <button class="preview-toolbar-btn close" id="preview-close-btn">✕ 닫기</button>
+    </div>
+  </div>
+  <div class="preview-a4" id="preview-a4-content"></div>
 </div>
 
 <script>
@@ -581,6 +724,7 @@ let audioChunks = [];
 let audioBlob = null;
 let audioMime = '';
 let audioExt  = 'webm';
+let lastPreviewData = null; // 미리보기용 마지막 비교 결과
 
 /* ════════════ 유틸 ════════════ */
 function setStatus(msg){ document.getElementById('status').textContent = msg; }
@@ -787,47 +931,75 @@ function stopRec(){
   if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
   document.getElementById('btn-rec').classList.remove('recording');
   document.getElementById('rec-label').textContent = '② 녹음 시작';
-  // transcript 가 비어있지 않으면 recordedText 에 반드시 반영
+  // 녹음 중지 시점의 텍스트를 확정(freeze)하여 recordedText 에 저장
   if(transcript.trim()) recordedText = transcript;
   updateRecordedPreview();
-  // 텍스트 저장 버튼 활성화
   if(transcript.trim()){
     const btn = document.getElementById('btn-save-txt');
     btn.disabled = false; btn.classList.add('ready');
   }
-  setStatus('녹음 완료 ✓ — 저장하거나 비교 분석 버튼을 누르세요');
+  setStatus('녹음 완료 ✓ — 음성저장 버튼을 누르면 저장 후 자동 비교됩니다');
 }
 
-/* ════════════ 텍스트 저장 ════════════ */
-document.getElementById('btn-save-txt').addEventListener('click', function(){
-  if(!transcript.trim()){ alert('저장할 텍스트가 없습니다.'); return; }
+/* ════════════ 공통 저장 함수 ════════════ */
+function makeTimestamp(){
   const now = new Date();
-  const ts = now.getFullYear()+''+(now.getMonth()+1).toString().padStart(2,'0')+now.getDate().toString().padStart(2,'0')+'_'+now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0');
-  const filename = '녹음_' + ts + '.txt';
-  const blob = new Blob([transcript], {type:'text/plain;charset=utf-8'});
+  return now.getFullYear()+''
+    +(now.getMonth()+1).toString().padStart(2,'0')
+    +now.getDate().toString().padStart(2,'0')+'_'
+    +now.getHours().toString().padStart(2,'0')
+    +now.getMinutes().toString().padStart(2,'0');
+}
+function saveTxtFile(ts, text){
+  if(!text || !text.trim()) return false;
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = filename;
+  a.href = url; a.download = '녹음_' + ts + '.txt';
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
-  setStatus('텍스트 파일이 저장되었습니다: ' + filename);
+  return true;
+}
+
+/* ════════════ 텍스트 저장 (단독) ════════════ */
+document.getElementById('btn-save-txt').addEventListener('click', function(){
+  const text = recordedText.trim() || transcript.trim();
+  if(!text){ alert('저장할 텍스트가 없습니다.'); return; }
+  const ts = makeTimestamp();
+  saveTxtFile(ts, text);
+  setStatus('텍스트 파일이 저장되었습니다: 녹음_' + ts + '.txt');
 });
 
-/* ════════════ 음성 저장 ════════════ */
+/* ════════════ 음성 저장 → 텍스트 동시 저장 → 비교 분석 자동 실행 ════════════ */
 document.getElementById('btn-save-audio').addEventListener('click', function(){
   if(!audioBlob){ alert('저장할 음성이 없습니다.'); return; }
-  const now = new Date();
-  const ts = now.getFullYear()+''+(now.getMonth()+1).toString().padStart(2,'0')+now.getDate().toString().padStart(2,'0')+'_'+now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0');
-  const filename = '녹음_' + ts + '.' + (audioExt || 'webm');
+
+  // 저장 시점 텍스트 확정 (이 텍스트가 비교에 사용됨)
+  const savedText = recordedText.trim() || transcript.trim();
+  if(!savedText){ alert('저장할 텍스트가 없습니다. 녹음 후 다시 시도해 주세요.'); return; }
+  recordedText = savedText; // 비교 대상으로 고정
+
+  const ts = makeTimestamp();
+
+  // ① 음성 저장
+  const audioFilename = '녹음_' + ts + '.' + (audioExt || 'webm');
   const url = URL.createObjectURL(audioBlob);
   const a = document.createElement('a');
-  a.href = url; a.download = filename;
+  a.href = url; a.download = audioFilename;
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
-  // 음성 저장 후에도 recordedText 유지 확인
-  if(!recordedText.trim() && transcript.trim()) recordedText = transcript;
-  setStatus('음성 파일 저장 완료: ' + filename + ' — 비교 분석 버튼을 누르세요');
-  showBanner('✓ 음성 파일이 저장되었습니다. 이제 <strong>비교 분석</strong> 버튼을 누르세요.', 'ok');
+
+  // ② 텍스트 저장 (500ms 딜레이 — 안드로이드 다운로드 중복 방지)
+  setTimeout(() => {
+    saveTxtFile(ts, savedText);
+    setStatus('음성 + 텍스트 저장 완료 ✓ — 비교 분석 시작...');
+    showBanner('✓ 음성(.'+audioExt+')과 텍스트(.txt) 저장 완료!<br>저장된 텍스트로 <strong>자동 비교 분석</strong>합니다.', 'ok');
+
+    // ③ 저장된 텍스트로 자동 비교 분석 (1초 후)
+    setTimeout(() => {
+      compare();
+    }, 1000);
+  }, 500);
 });
 
 /* ════════════ 클로바노트 파일 불러오기 ════════════ */
@@ -890,28 +1062,44 @@ document.getElementById('btn-clova-apply').addEventListener('click', function(){
 /* ════════════ 지우기 / 초기화 ════════════ */
 document.getElementById('btn-clear-rec').addEventListener('click', function(){
   if(isRecording) stopRec();
-  transcript = ''; recordedText = ''; audioBlob = null; audioChunks = [];
+  transcript = ''; recordedText = '';
+  audioBlob = null; audioChunks = []; audioMime = ''; audioExt = 'webm';
   document.getElementById('clova-paste').value = '';
   document.getElementById('file-name-tag').style.display = 'none';
   document.getElementById('btn-save-txt').disabled = true;
   document.getElementById('btn-save-txt').classList.remove('ready');
   document.getElementById('btn-save-audio').disabled = true;
   document.getElementById('btn-save-audio').classList.remove('ready');
+  document.getElementById('btn-save-audio').innerHTML =
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> 음성 저장 (.webm)';
+  document.getElementById('btn-print').disabled = true;
+  document.getElementById('btn-print').classList.remove('ready');
+  document.getElementById('btn-preview').disabled = true;
+  document.getElementById('btn-preview').classList.remove('ready');
+  lastPreviewData = null;
+  document.getElementById('result-area').innerHTML =
+    '<div class="result-panel"><div class="empty-state">비교 분석 결과가 여기에 표시됩니다</div></div>';
   updateRecordedPreview();
   hideBanner();
   setStatus('녹음 내용이 지워졌습니다');
 });
 document.getElementById('btn-clear-all').addEventListener('click', function(){
   if(isRecording) stopRec();
-  transcript = ''; recordedText = ''; selected = []; audioBlob = null; audioChunks = [];
+  transcript = ''; recordedText = ''; selected = [];
+  audioBlob = null; audioChunks = []; audioMime = ''; audioExt = 'webm';
   document.getElementById('clova-paste').value = '';
   document.getElementById('file-name-tag').style.display = 'none';
   document.getElementById('btn-save-txt').disabled = true;
   document.getElementById('btn-save-txt').classList.remove('ready');
   document.getElementById('btn-save-audio').disabled = true;
   document.getElementById('btn-save-audio').classList.remove('ready');
+  document.getElementById('btn-save-audio').innerHTML =
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> 음성 저장 (.webm)';
   document.getElementById('btn-print').disabled = true;
   document.getElementById('btn-print').classList.remove('ready');
+  document.getElementById('btn-preview').disabled = true;
+  document.getElementById('btn-preview').classList.remove('ready');
+  lastPreviewData = null;
   document.getElementById('result-area').innerHTML =
     '<div class="result-panel"><div class="empty-state">비교 분석 결과가 여기에 표시됩니다</div></div>';
   updateChapterUI();
@@ -1056,12 +1244,149 @@ function compare(){
       </div>
     </div>`;
 
-  // 프린트 버튼 활성화
+  // 프린트 / 미리보기 버튼 활성화
   const pb = document.getElementById('btn-print');
   pb.disabled = false; pb.classList.add('ready');
+  const pvb = document.getElementById('btn-preview');
+  pvb.disabled = false; pvb.classList.add('ready');
+
+  // 미리보기용 문장별 데이터 저장
+  lastPreviewData = {
+    lH, rH, accuracy, grade, sc, gd,
+    correct, missing, extra, sub, bc, chInfo,
+    origWords, recWords, ops, wordSentIdx
+  };
 
   setTimeout(()=>document.getElementById('result-area').scrollIntoView({behavior:'smooth',block:'start'}),150);
 }
+
+/* ════════════ 미리보기 ════════════ */
+function buildPreviewHTML(d){
+  const now = new Date();
+  const dateStr = now.getFullYear()+'.'
+    +(now.getMonth()+1).toString().padStart(2,'0')+'.'+now.getDate().toString().padStart(2,'0')
+    +' '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+
+  // ── 문장별로 ops를 분리 ──
+  // ops 를 wordSentIdx 기준으로 문장 그룹으로 묶기
+  const sentGroups = []; // [{sentIdx, origWords:[], recWords:[], ops:[]}]
+  let curSent = -1;
+  let origPtr2 = 0;
+
+  d.ops.forEach(op => {
+    let si = curSent;
+    if(op.t !== 'extra'){
+      si = d.wordSentIdx[origPtr2] !== undefined ? d.wordSentIdx[origPtr2] : curSent;
+      origPtr2++;
+    }
+    // 새 문장 시작 또는 아직 그룹이 없을 때
+    if(si !== curSent || sentGroups.length === 0){
+      // extra 이면서 아직 그룹이 없는 경우 — 첫 번째 그룹에 포함
+      if(op.t === 'extra' && sentGroups.length === 0){
+        sentGroups.push({si: 0, ops:[]});
+      } else if(si !== curSent) {
+        curSent = si;
+        sentGroups.push({si, ops:[]});
+      }
+    }
+    if(sentGroups.length === 0) sentGroups.push({si:0, ops:[]});
+    sentGroups[sentGroups.length-1].ops.push(op);
+  });
+
+  // ── 문장별 HTML 생성 ──
+  function wordHTML(op, side){
+    if(op.t==='ok'){
+      return `<span class="pw pw-ok">${esc(side==='l'?op.aw:op.bw)}</span>`;
+    } else if(op.t==='miss'){
+      return side==='l'
+        ? `<span class="pw pw-miss">${esc(op.aw)}</span>`
+        : `<span class="pw pw-ph">—</span>`;
+    } else if(op.t==='extra'){
+      return side==='l'
+        ? `<span class="pw pw-ph">—</span>`
+        : `<span class="pw pw-extra">${esc(op.bw)}</span>`;
+    } else {
+      return `<span class="pw pw-sub">${esc(side==='l'?op.aw:op.bw)}</span>`;
+    }
+  }
+
+  // 문장에 오류가 있는지 확인
+  function hasProblem(ops){ return ops.some(o=>o.t!=='ok'); }
+
+  let rowsHTML = '';
+  sentGroups.forEach((sg, idx) => {
+    const lWords = sg.ops.map(o => wordHTML(o,'l')).join(' ');
+    const rWords = sg.ops.map(o => wordHTML(o,'r')).join(' ');
+    const prob = hasProblem(sg.ops);
+    const rowBg = prob ? '' : '';
+    const numColor = prob ? '#cc0000' : '#999';
+    const lBg = prob ? 'background:#fff5f5;' : '';
+    const rBg = prob ? 'background:#f5fff8;' : '';
+    rowsHTML += `
+      <div class="pv-row" style="${rowBg}">
+        <div class="pv-cell pv-orig" style="${lBg}">
+          <span class="pv-num" style="color:${numColor};">${idx+1}</span>
+          <div class="pv-words">${lWords}</div>
+        </div>
+        <div class="pv-cell pv-rec" style="${rBg}">
+          <span class="pv-num" style="color:${numColor};">${idx+1}</span>
+          <div class="pv-words">${rWords}</div>
+        </div>
+      </div>`;
+  });
+
+  return `
+    <div class="pv-header">
+      <div class="pv-title">전도폭발훈련 전문 구두점검</div>
+      <div class="pv-subtitle">${d.chInfo}</div>
+      <div class="pv-meta">출력일시: ${dateStr} &nbsp;|&nbsp; 일치율: ${d.accuracy}% (${d.grade}) &nbsp;|&nbsp; 일치 ${d.correct} / 누락 ${d.missing} / 추가 ${d.extra} / 대체 ${d.sub}</div>
+      <div class="pv-legend">
+        <div class="pv-legend-item"><span class="pv-leg-sample pw-miss">단어</span> 누락(빨강)</div>
+        <div class="pv-legend-item"><span class="pv-leg-sample pw-extra">단어</span> 추가(파랑)</div>
+        <div class="pv-legend-item"><span class="pv-leg-sample pw-sub">단어</span> 대체·오타(보라)</div>
+      </div>
+    </div>
+    <div class="pv-progress-wrap">
+      <div class="pv-progress-label"><span>일치율</span><span>${d.accuracy}%</span></div>
+      <div class="pv-progress-track">
+        <div class="pv-progress-fill" style="width:${d.accuracy}%;background:${d.bc};"></div>
+      </div>
+    </div>
+    <div class="pv-table">
+      <div class="pv-table-header">
+        <div class="pv-th">원본 텍스트</div>
+        <div class="pv-th">녹음 텍스트</div>
+      </div>
+      ${rowsHTML}
+    </div>
+  `;
+}
+
+document.getElementById('btn-preview').addEventListener('click', function(){
+  if(!lastPreviewData){ alert('먼저 비교 분석을 실행해 주세요.'); return; }
+  document.getElementById('preview-a4-content').innerHTML = buildPreviewHTML(lastPreviewData);
+  document.getElementById('preview-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+});
+
+document.getElementById('preview-close-btn').addEventListener('click', function(){
+  document.getElementById('preview-modal').classList.remove('open');
+  document.body.style.overflow = '';
+});
+
+document.getElementById('preview-print-btn').addEventListener('click', function(){
+  document.getElementById('preview-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(()=>{ window.print(); }, 300);
+});
+
+// 모달 배경 탭으로 닫기
+document.getElementById('preview-modal').addEventListener('click', function(e){
+  if(e.target === this){
+    this.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
 
 /* ════════════ 초기화 ════════════ */
 /* 프린트 버튼 */
@@ -1089,5 +1414,19 @@ document.getElementById('btn-print').addEventListener('click', function(){
 
 renderChapters();
 </script>
+
+<!-- ════════════ 미리보기 모달 ════════════ -->
+<div class="preview-modal" id="preview-modal">
+  <div class="preview-toolbar">
+    <span class="preview-toolbar-title">📄 A4 미리보기</span>
+    <div class="preview-toolbar-btns">
+      <button class="preview-toolbar-btn print" id="preview-print-btn">🖨️ 프린트</button>
+      <button class="preview-toolbar-btn close" id="preview-close-btn">✕ 닫기</button>
+    </div>
+  </div>
+  <div class="preview-a4" id="preview-a4-content">
+    <!-- 동적으로 채워짐 -->
+  </div>
+</div>
 </body>
 </html>
