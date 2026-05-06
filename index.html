@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0e0f11">
-<title>음성 비교기</title>
+<title>전도폭발훈련 전문 구두점검</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -124,7 +124,7 @@ textarea::placeholder{color:var(--text-dim);}
 }
 .btn-save:active{background:var(--border);}
 .btn-save.ready{border-color:var(--green-border);background:var(--green-bg);color:var(--green);}
-.btn-save:disabled{opacity:.3;cursor:not-allowed;}
+.btn-save[disabled]{opacity:.3;cursor:not-allowed;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
 /* 클로바노트 패널 */
@@ -394,8 +394,8 @@ textarea::placeholder{color:var(--text-dim);}
 <div class="page">
 
   <div class="header">
-    <div class="tag">SPEECH · TEXT · COMPARE</div>
-    <h1>원본 vs 녹음<br><span>나란히 비교</span></h1>
+    <div class="tag">전도폭발훈련 · 전문 구두점검</div>
+    <h1>전도폭발훈련<br><span>전문 구두점검</span></h1>
     <p class="subtitle">챕터를 선택하고 마이크 또는 클로바노트로 비교하세요</p>
   </div>
 
@@ -561,7 +561,7 @@ const CHAPTERS = [
   { id:2, num:'2장', title:'은혜',
     text:`영생은 값없이 주시는 하나님의 선물입니다. 그러므로 영생은 돈이나 공로나 자격으로 얻는 것이 아닙니다. 성경은 너희는 그 은혜에 의하여 구원을 받았으니 이것은 너희에게서 난 것이 아니요 하나님의 선물이라 행위에서 난 것이 아니니 이는 누구든지 자랑하지 못하게 함이라 라고 말씀하십니다. 사실 우리가 살면서 생명과 관계되는 가장 중요한 것은 값없이 다 선물로 받았어요. 예를 들면 밝은 햇빛 공기 물 등은 값없이 다 선물로 거져 받았습니다. 이와 같이 영생도 하나님이 우리에게 값없이 다 선물로 주신다는 것입니다. 그렇다면 하나님은 영생을 왜 선물로 주셔야만 할까요. 이것은 성경이 인간에 관하여 하신 말씀을 잘 이해할 때 좀 더 분명히 알 수 있습니다.` },
   { id:3, num:'3장', title:'인간',
-    text:`인간은 죄인입니다. 그러므로 죄인은 자신을 구원할 수 없습니다. 성경은 모든 사람이 죄를 범하였으매 하나님의 영광에 이르지 못하더니라고 말씀하십니다. 성경에서는 죄를 이렇게 정의하고 있습니다. 첫째 강도 살인 도적질 간음처럼 하지 말아야 할 것을 하는 것이 죄이고 둘째 부모 공경 이웃 사랑처럼 해야 하는 것을 하지 않는 것도 역시 죄이며 셋째 교만 탐심 미움 질투처럼 나쁜 마음이나 나쁜 생각을 하는 것도 죄입니다. 그러나 무엇보다도 하나님을 하나님으로 믿지 않는 것이 가장 큰 죄입니다. 이런 기준으로 볼 때 선생님은 하루에 몇 번 정도 죄를 짓는다고 생각하세요. 사실 우리는 자신도 모르게 많은 죄를 지으며 살지요. 성경의 기준으로 볼 때 어떤 사람이 하루에 열번이나 다섯번 아니 단지 세 번만 죄를 짓는다고 생각해 보십시다. 그 사람은 걸어다니는 천사라고 할 수 있을 것입니다. 그러나 그런 천사와 같은 자라도 하루 세 번씩 일년이면 천 번 이상 구십평생을 산다면 구만 번 이상의 죄를 짓게 되는 셈이지요. 그래서 이 세상에서 자신은 죄인이 아니라고 주장할 수 있는 사람은 단 한 사람도 없습니다. 그렇다면 이런 죄인이 어떻게 영생을 선물로 받을 수 있을까요. 이것은 성경이 하나님에 관하여 하신 말씀을 잘 이해할 때 좀 더 분명히 알 수 있습니다.` },
+    text:`인간은 죄인입니다. 그러므로 죄인은 자신을 구원할 수 없습니다. 성경은 모든 사람이 죄를 범하였으매 하나님의 영광에 이르지 못하더니라고 말씀하십니다. 성경에서는 죄를 이렇게 정의하고 있습니다. 첫째 강도 살인 도적질 간음처럼 하지 말아야 할 것을 하는 것이 죄이고 둘째 부모 공경 이웃 사랑처럼 해야 하는 것을 하지 않는 것도 역시 죄이며 셋째 교만 탐심 미움 질투처럼 나쁜 마음이나 나쁜 생각을 하는 것도 죄입니다. 그러나 무엇보다도 하나님을 하나님으로 믿지 않는 것이 가장 큰 죄입니다. 이런 기준으로 볼 때 선생님은 하루에 몇 번 정도 죄를 짓는다고 생각하세요. 물론 저도 그래요. 사실 우리는 자신도 모르게 많은 죄를 지으며 살지요. 성경의 기준으로 볼 때 어떤 사람이 하루에 열번이나 다섯번 아니 단지 세 번만 죄를 짓는다고 생각해 보십시다. 그 사람은 걸어다니는 천사라고 할 수 있을 것입니다. 그러나 그런 천사와 같은 자라도 하루 세 번씩 일년이면 천 번 이상 구십평생을 산다면 구만 번 이상의 죄를 짓게 되는 셈이지요. 그래서 이 세상에서 자신은 죄인이 아니라고 주장할 수 있는 사람은 단 한 사람도 없습니다. 그렇다면 이런 죄인이 어떻게 영생을 선물로 받을 수 있을까요. 이것은 성경이 하나님에 관하여 하신 말씀을 잘 이해할 때 좀 더 분명히 알 수 있습니다.` },
   { id:4, num:'4장', title:'하나님',
     text:`하나님은 자비로우셔서 우리를 벌하시는 것을 원치 않으십니다. 하지만 하나님은 의로우시기 때문에 반드시 우리 죄를 벌하셔야만 합니다. 성경은 하나님은 사랑이심이라라고 말씀하십니다. 하지만 벌을 면제하지는 아니하고 보응하리라라고 말씀하십니다. 전쟁 중인 러시아 제국에서 부족한 식량을 훔치는 사건이 종종 발생했습니다. 화가 난 지휘관 가르시아 장군은 누구든지 식량을 훔치다 잡힌 사람에게는 끔찍한 채찍질을 가하겠다고 선포했습니다. 그런데 도둑을 잡고 보니 다른 사람이 아닌 그의 어머니였습니다. 장군은 원칙대로 사랑하는 어머니에게 채찍질을 가하자니 늙으신 어머님이 돌아가실 것 같고 원칙을 무시하고 그냥 넘어가자니 부하들에게 군기가 서지 않을 것 같았습니다. 결국 지휘관이 만든 원칙에 따라 처벌해야 하는 날 그는 어머니 앞에서 겉옷을 벗었습니다. 그리고 부하들에게 명했습니다. 어머니 대신 나에게 채찍을 가하라. 그는 어머니 대신 채찍에 맞음으로써 어머니를 향한 사랑을 실천했을 뿐만 아니라 동시에 죄인을 처벌하는 공의도 실천하게 된 것입니다. 이처럼 자비로우시고 의로우신 하나님은 우리의 죄 문제를 예수 그리스도 안에서 단번에 해결하셨습니다.` },
   { id:5, num:'5장', title:'그리스도',
@@ -754,6 +754,7 @@ function startRec(){
       else interim += e.results[i][0].transcript;
     }
     transcript = final;
+    // 항상 recordedText 동기화 (interim 포함)
     recordedText = transcript + interim;
     updateRecordedPreview();
   };
@@ -774,7 +775,8 @@ function stopRec(){
   if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
   document.getElementById('btn-rec').classList.remove('recording');
   document.getElementById('rec-label').textContent = '② 녹음 시작';
-  recordedText = transcript;
+  // transcript 가 비어있지 않으면 recordedText 에 반드시 반영
+  if(transcript.trim()) recordedText = transcript;
   updateRecordedPreview();
   // 텍스트 저장 버튼 활성화
   if(transcript.trim()){
@@ -810,7 +812,10 @@ document.getElementById('btn-save-audio').addEventListener('click', function(){
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
-  setStatus('음성 파일이 저장되었습니다: ' + filename);
+  // 음성 저장 후에도 recordedText 유지 확인
+  if(!recordedText.trim() && transcript.trim()) recordedText = transcript;
+  setStatus('음성 파일 저장 완료: ' + filename + ' — 비교 분석 버튼을 누르세요');
+  showBanner('✓ 음성 파일이 저장되었습니다. 이제 <strong>비교 분석</strong> 버튼을 누르세요.', 'ok');
 });
 
 /* ════════════ 클로바노트 파일 불러오기 ════════════ */
@@ -825,14 +830,25 @@ document.getElementById('clova-file-input').addEventListener('change', function(
     showBanner('⚠ 파일이 너무 큽니다 (5MB 이하만 가능)', 'err'); return;
   }
   const reader = new FileReader();
-  reader.onload = function(e){
-    const text = e.target.result;
+  function applyText(text) {
     document.getElementById('clova-paste').value = text;
     const tag = document.getElementById('file-name-tag');
     tag.textContent = '📄 ' + file.name;
     tag.style.display = 'block';
     showBanner('✓ 파일을 불러왔습니다. 아래 <strong>적용하기</strong> 버튼을 누르세요.', 'ok');
     setStatus('파일 불러오기 완료 — 적용 버튼을 누르세요');
+  }
+  reader.onload = function(e){
+    const text = e.target.result;
+    // 깨진 문자 포함 시 EUC-KR 재시도
+    if(text.includes('�')){
+      const r2 = new FileReader();
+      r2.onload = ev => applyText(ev.target.result);
+      r2.onerror = () => showBanner('⚠ 파일 인코딩 오류. UTF-8 또는 EUC-KR txt 파일을 사용해 주세요.', 'err');
+      r2.readAsText(file, 'EUC-KR');
+    } else {
+      applyText(text);
+    }
   };
   reader.onerror = function(){
     showBanner('⚠ 파일을 읽을 수 없습니다. txt 파일인지 확인해 주세요.', 'err');
@@ -882,6 +898,8 @@ document.getElementById('btn-clear-all').addEventListener('click', function(){
   document.getElementById('btn-save-txt').classList.remove('ready');
   document.getElementById('btn-save-audio').disabled = true;
   document.getElementById('btn-save-audio').classList.remove('ready');
+  document.getElementById('btn-print').disabled = true;
+  document.getElementById('btn-print').classList.remove('ready');
   document.getElementById('result-area').innerHTML =
     '<div class="result-panel"><div class="empty-state">비교 분석 결과가 여기에 표시됩니다</div></div>';
   updateChapterUI();
@@ -895,7 +913,8 @@ document.getElementById('btn-analyze').addEventListener('click', compare);
 function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function splitSentences(raw){
-  const sents = raw.split(/(?<=[.?!。？！])\s+/).map(s=>s.trim()).filter(Boolean);
+  // lookbehind 대신 안드로이드 호환 방식으로 문장 분리
+  const sents = raw.replace(/([.?!。？！])\s+/g, '$1 ').split(' ').map(s=>s.trim()).filter(Boolean);
   const wordList=[], wordSentIdx=[];
   sents.forEach((s,si)=>{
     s.replace(/[.,?!，。？！""''「」『』()（）[\]]/g,'')
@@ -937,8 +956,14 @@ function mergeOps(ops){
 }
 
 function compare(){
-  if(isRecording) stopRec();
+  // stopRec() 전에 먼저 현재 텍스트 캡처 (mediaRecorder.onstop 은 비동기이므로)
+  if(isRecording){
+    if(transcript.trim()) recordedText = transcript; // 비동기 완료 전 미리 저장
+    stopRec();
+  }
   const origRaw = document.getElementById('original').value.trim();
+  // recordedText 와 transcript 둘 다 확인
+  if(!recordedText.trim() && transcript.trim()) recordedText = transcript;
   const recRaw  = recordedText.trim();
   if(!origRaw){ alert('원본 텍스트를 선택하거나 입력해 주세요.'); return; }
   if(!recRaw) { alert('녹음 텍스트가 없습니다.\n마이크 녹음 또는 클로바노트 파일/붙여넣기를 먼저 해주세요.'); return; }
@@ -1038,10 +1063,11 @@ document.getElementById('btn-print').addEventListener('click', function(){
     +' '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
 
   // 점수 가져오기
-  const badge = document.querySelector('.score-badge');
-  const grade = document.querySelector('.score-grade');
-  const accuracy = badge ? badge.textContent : '';
-  const gradeText = grade ? grade.textContent : '';
+  // innerHTML 재생성 후 안전하게 클래스 전체에서 첫 번째 요소 탐색
+  const badgeEl = document.getElementById('result-area').querySelector('.score-badge');
+  const gradeEl = document.getElementById('result-area').querySelector('.score-grade');
+  const accuracy = badgeEl ? badgeEl.textContent : '';
+  const gradeText = gradeEl ? gradeEl.textContent : '';
 
   document.getElementById('print-title').textContent = '음성 텍스트 비교 결과 — ' + chInfo;
   document.getElementById('print-meta').textContent = '출력일시: ' + dateStr + '  |  일치율: ' + accuracy + ' (' + gradeText + ')';
