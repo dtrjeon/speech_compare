@@ -640,13 +640,13 @@ textarea::placeholder{color:var(--text-dim);}
       <!-- ① 방식 선택 토글 스위치 -->
       <div class="rec-mode-row">
         <div class="rec-mode-label">
-          <strong id="rec-mode-title">① 🤖 Whisper API</strong><br>
-          <span id="rec-mode-desc" style="font-size:11px;">정확도 높음 (기본값)</span>
+          <strong id="rec-mode-title">① 🎙️ 실시간 STT</strong><br>
+          <span id="rec-mode-desc" style="font-size:11px;">브라우저 내장 (무료, Chrome 권장)</span>
         </div>
         <div class="toggle-wrap">
           <span class="toggle-text api" id="toggle-lbl-api">API</span>
           <label class="toggle-switch">
-            <input type="checkbox" id="rec-mode-toggle">
+            <input type="checkbox" id="rec-mode-toggle" checked>
             <div class="toggle-track">
               <div class="toggle-thumb"></div>
             </div>
@@ -692,7 +692,7 @@ textarea::placeholder{color:var(--text-dim);}
       </div>
 
       <!-- Whisper API 패널 -->
-      <div class="rec-mode-panel active" id="panel-rec-api">
+      <div class="rec-mode-panel" id="panel-rec-api">
         <div class="whisper-section">
           <div class="whisper-label">🤖 Whisper API 설정</div>
           <div class="whisper-key-row">
@@ -715,7 +715,7 @@ textarea::placeholder{color:var(--text-dim);}
       </div>
 
       <!-- STT 패널 -->
-      <div class="rec-mode-panel" id="panel-rec-stt">
+      <div class="rec-mode-panel active" id="panel-rec-stt">
         <div class="whisper-section" style="border-color:var(--red-border);background:var(--red-bg);">
           <div class="whisper-label" style="color:var(--red);">🎙️ 실시간 STT</div>
           <div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:8px;">
@@ -865,7 +865,7 @@ let audioMime = '';
 let audioExt  = 'webm';
 let lastPreviewData = null;
 let whisperApiKey = localStorage.getItem('whisper_api_key') || '';
-let recMode = 'api'; // 'api' | 'stt'
+let recMode = 'stt'; // 'api' | 'stt'
 
 /* ════════════ 유틸 ════════════ */
 function setStatus(msg){ document.getElementById('status').textContent = msg; }
@@ -1440,7 +1440,7 @@ function applyRecMode(mode){
   document.getElementById('rec-mode-toggle').checked = !isApi;
   // 제목/설명 업데이트
   document.getElementById('rec-mode-title').textContent = isApi ? '① 🤖 Whisper API' : '① 🎙️ 실시간 STT';
-  document.getElementById('rec-mode-desc').textContent  = isApi ? '정확도 높음 (기본값)' : '녹음 중 실시간 변환';
+  document.getElementById('rec-mode-desc').textContent  = isApi ? '정확도 높음' : '브라우저 내장 (무료, Chrome 권장)';
   // 패널 표시
   document.getElementById('panel-rec-api').classList.toggle('active', isApi);
   document.getElementById('panel-rec-stt').classList.toggle('active', !isApi);
@@ -1456,8 +1456,8 @@ document.getElementById('rec-mode-toggle').addEventListener('change', function()
   applyRecMode(this.checked ? 'stt' : 'api');
 });
 
-// 초기 상태 적용 (기본: api)
-applyRecMode('api');
+// 초기 상태 적용 (기본: stt)
+applyRecMode('stt');
 
 
 /* ════════════ Whisper API ════════════ */
