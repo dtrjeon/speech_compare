@@ -254,23 +254,47 @@ textarea::placeholder{color:var(--text-dim);}
     margin: 15mm 12mm 15mm 12mm;
   }
 
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-scheme: light !important;
+  }
 
-  body {
-    background: #fff !important;
-    color: #000 !important;
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
     font-family: 'Noto Sans KR', sans-serif;
     font-size: 10pt;
     width: 100%;
     margin: 0; padding: 0;
+    color-scheme: light !important;
+  }
+
+  /* 미리보기 모달 프린트 모드 */
+  .preview-modal {
+    display: block !important;
+    position: static !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+  .preview-toolbar { display: none !important; }
+  .preview-a4 {
+    width: 100% !important;
+    min-width: unset !important;
+    min-height: unset !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
   }
 
   /* 화면 UI 모두 숨기기 */
   .header, .chapter-section, .input-card, .input-mode-card,
   .recorded-preview, .bottom-btns, .legend,
   .result-panel .score-bar .stats-row,
-  #banner, .btn-print, .preview-modal,
-  .page > *:not(#result-area) { display: none !important; }
+  #banner, .btn-print,
+  .page { display: none !important; }
 
   #result-area { display: block !important; }
   .result-panel { border: none !important; border-radius: 0 !important; box-shadow: none !important; }
@@ -1682,9 +1706,26 @@ document.getElementById('preview-close-btn').addEventListener('click', function(
 });
 
 document.getElementById('preview-print-btn').addEventListener('click', function(){
-  document.getElementById('preview-modal').classList.remove('open');
+  // 프린트 전 배경 흰색 강제 적용
+  const modal = document.getElementById('preview-modal');
+  const origBg = document.body.style.background;
+  const origColor = document.body.style.color;
+  document.body.style.background = '#ffffff';
+  document.body.style.color = '#000000';
+  document.documentElement.style.background = '#ffffff';
+  document.documentElement.style.colorScheme = 'light';
+  modal.classList.remove('open');
   document.body.style.overflow = '';
-  setTimeout(()=>{ window.print(); }, 300);
+  setTimeout(()=>{
+    window.print();
+    // 프린트 후 원래 스타일 복원
+    setTimeout(()=>{
+      document.body.style.background = origBg;
+      document.body.style.color = origColor;
+      document.documentElement.style.background = '';
+      document.documentElement.style.colorScheme = '';
+    }, 500);
+  }, 300);
 });
 
 // 모달 배경 탭으로 닫기
@@ -1716,7 +1757,19 @@ document.getElementById('btn-print').addEventListener('click', function(){
   document.getElementById('print-title').textContent = '음성 텍스트 비교 결과 — ' + chInfo;
   document.getElementById('print-meta').textContent = '출력일시: ' + dateStr + '  |  일치율: ' + accuracy + ' (' + gradeText + ')';
 
+  const origBg2 = document.body.style.background;
+  const origColor2 = document.body.style.color;
+  document.body.style.background = '#ffffff';
+  document.body.style.color = '#000000';
+  document.documentElement.style.background = '#ffffff';
+  document.documentElement.style.colorScheme = 'light';
   window.print();
+  setTimeout(()=>{
+    document.body.style.background = origBg2;
+    document.body.style.color = origColor2;
+    document.documentElement.style.background = '';
+    document.documentElement.style.colorScheme = '';
+  }, 500);
 });
 
 renderChapters();
