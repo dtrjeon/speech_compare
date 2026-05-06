@@ -243,6 +243,151 @@ textarea::placeholder{color:var(--text-dim);}
 .progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-bottom:6px;}
 .progress-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
 .progress-fill{height:100%;border-radius:3px;transition:width .7s ease;}
+
+/* ════════════ 프린트 스타일 (A4) ════════════ */
+@media print {
+  /* A4 페이지 설정 */
+  @page {
+    size: A4 portrait;
+    margin: 15mm 12mm 15mm 12mm;
+  }
+
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 10pt;
+    width: 100%;
+    margin: 0; padding: 0;
+  }
+
+  /* 화면 UI 모두 숨기기 */
+  .header, .chapter-section, .input-card, .input-mode-card,
+  .recorded-preview, .bottom-btns, .legend,
+  .result-panel .score-bar .stats-row,
+  #banner, .btn-print, .page > *:not(#result-area) { display: none !important; }
+
+  #result-area { display: block !important; }
+  .result-panel { border: none !important; border-radius: 0 !important; box-shadow: none !important; }
+
+  /* ── 인쇄 머리글 ── */
+  .print-header {
+    display: block !important;
+    margin-bottom: 8mm;
+  }
+  .print-header-title {
+    font-size: 14pt;
+    font-weight: 700;
+    border-bottom: 2px solid #000;
+    padding-bottom: 3mm;
+    margin-bottom: 2mm;
+  }
+  .print-header-meta {
+    font-size: 9pt;
+    color: #555;
+    margin-bottom: 2mm;
+  }
+  .print-legend {
+    display: flex !important;
+    gap: 12mm;
+    font-size: 8.5pt;
+    color: #333;
+    flex-wrap: wrap;
+    border: 0.5pt solid #ccc;
+    padding: 2mm 3mm;
+    border-radius: 1mm;
+    background: #f9f9f9;
+  }
+  .print-legend-item { display: flex; align-items: center; gap: 2mm; }
+
+  /* ── 점수 영역 ── */
+  .score-bar {
+    display: block !important;
+    background: #f5f5f5 !important;
+    border: 1pt solid #ccc !important;
+    border-radius: 2mm !important;
+    padding: 3mm 4mm !important;
+    margin-bottom: 4mm;
+  }
+  .score-top {
+    display: flex !important;
+    align-items: center;
+    gap: 4mm;
+    margin-bottom: 0 !important;
+  }
+  .score-badge {
+    font-size: 24pt !important;
+    font-weight: 900 !important;
+    color: #000 !important;
+    line-height: 1;
+    min-width: 18mm;
+  }
+  .score-grade { font-size: 13pt !important; font-weight: 700 !important; color: #000 !important; }
+  .score-desc  { font-size: 9pt  !important; color: #444 !important; margin-top: 1mm; }
+  .score-chapter { font-size: 8pt !important; color: #666 !important; margin-bottom: 1mm; }
+
+  /* ── 좌우 2단 비교 본문 ── */
+  .diff-section {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    border: 1pt solid #bbb;
+    border-radius: 1mm;
+    page-break-inside: auto;
+  }
+  .diff-block {
+    margin-bottom: 0 !important;
+    padding: 3mm 4mm !important;
+    page-break-inside: auto;
+  }
+  .diff-block:first-child {
+    border-right: 1pt solid #bbb !important;
+  }
+  .diff-block-title {
+    font-size: 8pt !important;
+    font-weight: 700 !important;
+    color: #333 !important;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border-bottom: 0.5pt solid #ccc !important;
+    padding-bottom: 1.5mm !important;
+    margin-bottom: 2mm !important;
+  }
+  .diff-content {
+    font-size: 10pt !important;
+    line-height: 1.9 !important;
+    word-break: keep-all;
+  }
+
+  /* ── 단어 표시 ── */
+  .w { padding: 0.5mm 1.5mm !important; margin: 0.5mm 1mm !important; border-radius: 1mm !important; }
+  .w-ok    { color: #000 !important; background: none !important; border: none !important; }
+  .w-miss  {
+    color: #000 !important; background: none !important; border: none !important;
+    text-decoration: line-through !important; text-decoration-thickness: 1.5pt;
+  }
+  .w-extra { background: #ebebeb !important; border: 0.5pt solid #888 !important; color: #000 !important; }
+  .w-sub   { background: #e0e0e0 !important; border: 0.5pt solid #888 !important; color: #000 !important; font-style: italic !important; }
+  .w-ph    { color: #bbb !important; font-size: 8pt !important; }
+
+  /* ── 일치율 바 ── */
+  .progress-wrap {
+    padding: 2mm 4mm !important;
+    background: #f5f5f5 !important;
+    border-top: 0.5pt solid #ccc !important;
+    border-bottom-left-radius: 1mm;
+    border-bottom-right-radius: 1mm;
+  }
+  .progress-label { font-size: 8pt !important; color: #444 !important; margin-bottom: 1.5mm; }
+  .progress-track { height: 3mm !important; background: #ddd !important; border-radius: 1.5mm !important; }
+  .progress-fill  { border-radius: 1.5mm !important; }
+}
+
+/* 화면에서는 프린트 전용 요소 숨기기 */
+.print-header, .print-legend { display: none; }
 </style>
 </head>
 <body>
@@ -379,6 +524,14 @@ textarea::placeholder{color:var(--text-dim);}
       </svg>
       비교 분석
     </button>
+    <button class="btn-save btn-print" id="btn-print" disabled style="width:100%;min-height:46px;border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <rect x="6" y="14" width="12" height="8"/>
+      </svg>
+      프린트 출력 (좌우 비교)
+    </button>
     <div class="btn-row2">
       <button class="btn-sm" id="btn-clear-rec">녹음 지우기</button>
       <button class="btn-sm" id="btn-clear-all">전체 초기화</button>
@@ -411,8 +564,10 @@ const CHAPTERS = [
     text:`인간은 죄인입니다. 그러므로 죄인은 자신을 구원할 수 없습니다. 성경은 모든 사람이 죄를 범하였으매 하나님의 영광에 이르지 못하더니라고 말씀하십니다. 성경에서는 죄를 이렇게 정의하고 있습니다. 첫째 강도 살인 도적질 간음처럼 하지 말아야 할 것을 하는 것이 죄이고 둘째 부모 공경 이웃 사랑처럼 해야 하는 것을 하지 않는 것도 역시 죄이며 셋째 교만 탐심 미움 질투처럼 나쁜 마음이나 나쁜 생각을 하는 것도 죄입니다. 그러나 무엇보다도 하나님을 하나님으로 믿지 않는 것이 가장 큰 죄입니다. 이런 기준으로 볼 때 선생님은 하루에 몇 번 정도 죄를 짓는다고 생각하세요. 사실 우리는 자신도 모르게 많은 죄를 지으며 살지요. 성경의 기준으로 볼 때 어떤 사람이 하루에 열번이나 다섯번 아니 단지 세 번만 죄를 짓는다고 생각해 보십시다. 그 사람은 걸어다니는 천사라고 할 수 있을 것입니다. 그러나 그런 천사와 같은 자라도 하루 세 번씩 일년이면 천 번 이상 구십평생을 산다면 구만 번 이상의 죄를 짓게 되는 셈이지요. 그래서 이 세상에서 자신은 죄인이 아니라고 주장할 수 있는 사람은 단 한 사람도 없습니다. 그렇다면 이런 죄인이 어떻게 영생을 선물로 받을 수 있을까요. 이것은 성경이 하나님에 관하여 하신 말씀을 잘 이해할 때 좀 더 분명히 알 수 있습니다.` },
   { id:4, num:'4장', title:'하나님',
     text:`하나님은 자비로우셔서 우리를 벌하시는 것을 원치 않으십니다. 하지만 하나님은 의로우시기 때문에 반드시 우리 죄를 벌하셔야만 합니다. 성경은 하나님은 사랑이심이라라고 말씀하십니다. 하지만 벌을 면제하지는 아니하고 보응하리라라고 말씀하십니다. 전쟁 중인 러시아 제국에서 부족한 식량을 훔치는 사건이 종종 발생했습니다. 화가 난 지휘관 가르시아 장군은 누구든지 식량을 훔치다 잡힌 사람에게는 끔찍한 채찍질을 가하겠다고 선포했습니다. 그런데 도둑을 잡고 보니 다른 사람이 아닌 그의 어머니였습니다. 장군은 원칙대로 사랑하는 어머니에게 채찍질을 가하자니 늙으신 어머님이 돌아가실 것 같고 원칙을 무시하고 그냥 넘어가자니 부하들에게 군기가 서지 않을 것 같았습니다. 결국 지휘관이 만든 원칙에 따라 처벌해야 하는 날 그는 어머니 앞에서 겉옷을 벗었습니다. 그리고 부하들에게 명했습니다. 어머니 대신 나에게 채찍을 가하라. 그는 어머니 대신 채찍에 맞음으로써 어머니를 향한 사랑을 실천했을 뿐만 아니라 동시에 죄인을 처벌하는 공의도 실천하게 된 것입니다. 이처럼 자비로우시고 의로우신 하나님은 우리의 죄 문제를 예수 그리스도 안에서 단번에 해결하셨습니다.` },
-  { id:5, num:'5장', title:'그리스도', text:`(5장 그리스도 본문을 여기에 입력하세요)` },
-  { id:6, num:'6장', title:'믿음',    text:`(6장 믿음 본문을 여기에 입력하세요)` }
+  { id:5, num:'5장', title:'그리스도',
+    text:`예수 그리스도는 참 하나님이신 동시에 참 인간이십니다. 예수 그리스도는 우리에게 영생을 선물로 주시기 위하여 십자가에서 죽으심으로 우리의 모든 죗값을 대신 치르시고 부활하셨습니다. 이 책이 제가 태어나서 지금까지 지은 모든 죄와 모든 생각 모든 말 모든 행위가 낱낱이 기록되어 있는 책이라고 생각해 보십시다. 성경은 어느 날 이 책이 하나님 앞에 펼쳐지고 제가 행한 대로 심판을 받게 될 것이라고 말씀하십니다. 그런데 바로 이 책에 기록된 저의 죄가 문제입니다. 하나님은 저를 사랑하시기 때문에 저를 벌하시는 것을 원치 않으시고 또한 하나님은 의로우시기 때문에 반드시 저의 죄를 벌하셔야만 합니다. 이 문제를 해결하기 위하여 하나님은 그의 사랑하시는 아들 예수 그리스도를 이 세상에 보내셨습니다. 성경은 우리는 다 양 같아서 그릇 행하여 각기 제 길로 갔거늘 여호와께서는 우리 모두의 죄악을 그에게 예수 그리스도에게 담당시키셨도다라고 말씀하십니다. 하나님이 미워하시는 저의 모든 죄가 그의 사랑하시는 아들 예수 그리스도께로 옮겨졌습니다. 십자가 위에서 우리의 모든 죗값이 다 치러졌을 때 예수 그리스도께서는 다 이루었다라고 말씀하셨습니다. 예수 그리스도는 우리의 모든 죗값을 대신 치르신 후 사흘 만에 부활하셔서 우리에게 영생을 선물로 주시기 위하여 승천하셨습니다. 지금 예수님은 영생을 선물로 주시고자 하십니다. 그렇다면 우리가 이 영생의 선물을 어떻게 받을 수가 있을까요. 이 영생의 선물은 오직 예수 그리스도를 믿음으로 받습니다. 그러나 중요한 사실은` },
+  { id:6, num:'6장', title:'믿음',
+    text:`단순한 지식적 동의와 일시적 현세적 믿음은 구원받는 믿음이 아닙니다. 구원받는 참 믿음은 우리의 구원을 위해서 오직 예수 그리스도만을 신뢰하는 것입니다. 성경은 주 예수를 믿으라 그리하면 너와 네 집이 구원을 받으리라라고 말씀하십니다. 구원받는 참 믿음이 무엇인지 이 의자를 가지고 설명하겠습니다. 여기 의자가 있다는 사실을 알고 계시지요. 그러나 단순히 의자가 여기 있다는 것만 알고 앉지 않는다면 여기 있는 의자가 저에게 무슨 소용이 있겠습니까. 송구한 말씀이지만 이 의자를 예수님이라고 가정해 보십시다. 의자가 편하게 해줄 것을 알면서도 의자 옆에 서 있기만 하듯이 예수 그리스도가 구원자란 사실을 머리로만 알고 예수 그리스도를 신뢰하지 않는다면 그 믿음은 단순히 지식적인 동의에 불과하므로 우리 자신을 구원하는 믿음이 아닙니다. 또한 예수 그리스도를 건강문제 재정문제 자녀문제 등 일시적이고 현세적인 문제들만 해결할 분으로 알고 각종 문제들은 예수 그리스도께 부탁드리면서도 자신은 여전히 예수 그리스도를 신뢰하지 않는다면 그 믿음은 일시적 현세적 문제만을 해결하려는 믿음으로 우리 자신을 구원하는 믿음이 아닙니다. 성경이 가르치는 구원받는 참 믿음은 자신의 모든 문제를 가지고 이처럼 자기 자신이 예수님을 온전히 신뢰하는 것을 말합니다. 어느 날 저는 제 삶의 모든 문제를 안은 채로 저 자신을 예수 그리스도께 맡겼습니다. 비로소 저는 영생을 선물로 받게 되었습니다. 얼마나 평안하고 기뻤는지 몰라요. 선생님 앞에서 선생님은 영생을 얻어 천국에 들어가는 이유가 선한 행위라고 하셨죠. 그렇다면 선생님은 영생을 얻어 천국에 들어가려고 결국 누구를 신뢰하고 계셨던 것일까요. 선생님께서 영생을 선물로 받고 천국에 들어가려면 신뢰의 대상을 자신의 선한 행위로부터 오직 예수 그리스도께로 옮기셔야만 합니다.` }
 ];
 
 /* ════════════ 상태 ════════════ */
@@ -424,6 +579,8 @@ let micGranted = false;
 let mediaRecorder = null;
 let audioChunks = [];
 let audioBlob = null;
+let audioMime = '';
+let audioExt  = 'webm';
 
 /* ════════════ 유틸 ════════════ */
 function setStatus(msg){ document.getElementById('status').textContent = msg; }
@@ -539,21 +696,43 @@ function startRec(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){ showBanner('⚠ Chrome 브라우저를 사용해 주세요.', 'err'); return; }
   hideBanner();
-  // MediaRecorder로 음성 파일도 동시 녹음
-  audioChunks = []; audioBlob = null;
+  // MediaRecorder — 기기 지원 형식 자동 감지 (m4a → webm opus → webm → ogg)
+  audioChunks = []; audioBlob = null; audioMime = ''; audioExt = 'webm';
   document.getElementById('btn-save-audio').disabled = true;
   document.getElementById('btn-save-audio').classList.remove('ready');
+  document.getElementById('btn-print').disabled = true;
+  document.getElementById('btn-print').classList.remove('ready');
+
+  const _candidates = [
+    { mime: 'audio/mp4',              ext: 'm4a'  },
+    { mime: 'audio/webm;codecs=opus', ext: 'webm' },
+    { mime: 'audio/webm',             ext: 'webm' },
+    { mime: 'audio/ogg;codecs=opus',  ext: 'ogg'  },
+  ];
+  const _supported = _candidates.find(c => {
+    try { return MediaRecorder.isTypeSupported(c.mime); } catch(e){ return false; }
+  });
+
   navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
-    mediaRecorder = new MediaRecorder(stream);
+    let _options = {};
+    if(_supported){ _options = {mimeType: _supported.mime}; audioMime = _supported.mime; audioExt = _supported.ext; }
+    try {
+      mediaRecorder = new MediaRecorder(stream, _options);
+    } catch(e) {
+      mediaRecorder = new MediaRecorder(stream);
+      audioMime = ''; audioExt = 'webm';
+    }
     mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
     mediaRecorder.onstop = () => {
-      audioBlob = new Blob(audioChunks, {type:'audio/webm'});
+      const _type = audioMime || 'audio/webm';
+      audioBlob = new Blob(audioChunks, {type: _type});
       stream.getTracks().forEach(t=>t.stop());
       const btn = document.getElementById('btn-save-audio');
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> 음성 저장 (.' + audioExt + ')';
       btn.disabled = false; btn.classList.add('ready');
     };
     mediaRecorder.start();
-  }).catch(()=>{});
+  }).catch(()=>{ setStatus('마이크 스트림 오류 — 권한을 확인해 주세요'); });
 
   recognition = new SR();
   recognition.lang = 'ko-KR';
@@ -625,7 +804,7 @@ document.getElementById('btn-save-audio').addEventListener('click', function(){
   if(!audioBlob){ alert('저장할 음성이 없습니다.'); return; }
   const now = new Date();
   const ts = now.getFullYear()+''+(now.getMonth()+1).toString().padStart(2,'0')+now.getDate().toString().padStart(2,'0')+'_'+now.getHours().toString().padStart(2,'0')+now.getMinutes().toString().padStart(2,'0');
-  const filename = '녹음_' + ts + '.webm';
+  const filename = '녹음_' + ts + '.' + (audioExt || 'webm');
   const url = URL.createObjectURL(audioBlob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;
@@ -814,6 +993,16 @@ function compare(){
           <div class="stat-chip" style="background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue);"><span class="stat-num">${sub}</span><span class="stat-lbl">대체</span></div>
         </div>
       </div>
+      <!-- 프린트 전용 머리글 -->
+      <div class="print-header" id="print-header">
+        <div class="print-header-title" id="print-title">음성 텍스트 비교 결과</div>
+        <div class="print-header-meta" id="print-meta"></div>
+        <div class="print-legend">
+          <div class="print-legend-item"><span style="text-decoration:line-through;">취소선</span> = 누락</div>
+          <div class="print-legend-item"><span style="background:#f0f0f0;border:1px solid #999;padding:0 4px;border-radius:3px;">회색박스</span> = 추가</div>
+          <div class="print-legend-item"><span style="background:#e8e8e8;border:1px solid #999;padding:0 4px;border-radius:3px;font-style:italic;">이탤릭</span> = 대체</div>
+        </div>
+      </div>
       <div class="diff-section">
         <div class="diff-block">
           <div class="diff-block-title">원본 텍스트</div>
@@ -830,10 +1019,36 @@ function compare(){
       </div>
     </div>`;
 
+  // 프린트 버튼 활성화
+  const pb = document.getElementById('btn-print');
+  pb.disabled = false; pb.classList.add('ready');
+
   setTimeout(()=>document.getElementById('result-area').scrollIntoView({behavior:'smooth',block:'start'}),150);
 }
 
 /* ════════════ 초기화 ════════════ */
+/* 프린트 버튼 */
+document.getElementById('btn-print').addEventListener('click', function(){
+  // 머리글 정보 채우기
+  const chInfo = selected.length > 0
+    ? selected.map(id=>{ const c=CHAPTERS.find(x=>x.id===id); return c.num+' '+c.title; }).join(' + ')
+    : '직접 입력';
+  const now = new Date();
+  const dateStr = now.getFullYear()+'.'+(now.getMonth()+1).toString().padStart(2,'0')+'.'+now.getDate().toString().padStart(2,'0')
+    +' '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+
+  // 점수 가져오기
+  const badge = document.querySelector('.score-badge');
+  const grade = document.querySelector('.score-grade');
+  const accuracy = badge ? badge.textContent : '';
+  const gradeText = grade ? grade.textContent : '';
+
+  document.getElementById('print-title').textContent = '음성 텍스트 비교 결과 — ' + chInfo;
+  document.getElementById('print-meta').textContent = '출력일시: ' + dateStr + '  |  일치율: ' + accuracy + ' (' + gradeText + ')';
+
+  window.print();
+});
+
 renderChapters();
 </script>
 </body>
