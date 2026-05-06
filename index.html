@@ -417,7 +417,10 @@ textarea::placeholder{color:var(--text-dim);}
 /* A4 용지 */
 .preview-a4{
   width:210mm;min-height:297mm;
-  background:#fff;color:#000;
+  background:#ffffff !important;color:#000 !important;
+  -webkit-print-color-adjust:exact !important;
+  print-color-adjust:exact !important;
+  color-scheme:light !important;
   margin:16px auto;
   padding:15mm 12mm;
   box-shadow:0 4px 24px rgba(0,0,0,.4);
@@ -425,11 +428,18 @@ textarea::placeholder{color:var(--text-dim);}
   font-size:10pt;
   box-sizing:border-box;
 }
+/* 모바일에서도 A4 너비 유지 — 가로 스크롤로 확인 */
 @media screen and (max-width:600px){
+  .preview-modal{
+    overflow-x:auto;
+    overflow-y:auto;
+  }
   .preview-a4{
-    width:100%;min-height:auto;
-    margin:0;border-radius:0;
-    padding:12mm 8mm;
+    width:210mm;
+    min-width:210mm;
+    margin:0 auto;
+    border-radius:0;
+    padding:12mm 10mm;
   }
 }
 
@@ -1631,6 +1641,7 @@ function buildPreviewHTML(d){
   });
 
   return `
+    <div style="background:#ffffff !important;color:#000 !important;color-scheme:light !important;min-height:100%;">
     <div class="pv-header">
       <div class="pv-title">전도폭발훈련 전문 구두점검</div>
       <div class="pv-subtitle">${d.chInfo}</div>
@@ -1653,6 +1664,7 @@ function buildPreviewHTML(d){
         <div class="pv-th">녹음 텍스트</div>
       </div>
       ${rowsHTML}
+    </div>
     </div>
   `;
 }
