@@ -629,7 +629,7 @@ textarea::placeholder{color:var(--text-dim);}
     <div class="tag">전도폭발훈련 · 전문 구두점검</div>
     <h1>전문 구두 점검</h1>
     <p class="subtitle">전도폭발훈련</p>
-    <div style="position:absolute;top:20px;right:16px;font-size:10px;color:var(--text-dim);letter-spacing:.04em;">v2026.05.06 23:18</div>
+    <div style="position:absolute;top:20px;right:16px;font-size:10px;color:var(--text-dim);letter-spacing:.04em;">v2026.05.07 00:18</div>
   </div>
 
   <div id="banner" class="banner"></div>
@@ -1062,8 +1062,8 @@ function startRec(){
       if(e.results[i].isFinal) final += e.results[i][0].transcript;
       else interim += e.results[i][0].transcript;
     }
-    transcript = final;
-    recordedText = transcript + interim;
+    transcript = numToKor(final);
+    recordedText = numToKor(transcript + interim);
     updateRecordedPreview();
     // STT 모드일 때 실시간 텍스트 표시
     if(recMode === 'stt'){
@@ -1280,6 +1280,7 @@ document.getElementById('btn-clova-apply').addEventListener('click', function(){
     .replace(/\n+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+  cleaned = numToKor(cleaned);
   recordedText = cleaned;
   transcript = cleaned;
   updateRecordedPreview();
@@ -1344,6 +1345,42 @@ document.getElementById('btn-analyze').addEventListener('click', compare);
 
 /* ════════════ 비교 로직 ════════════ */
 function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── 숫자 → 한글 변환 ──
+function numToKor(str){
+  const units0 = ['','일','이','삼','사','오','육','칠','팔','구'];
+  const units1 = ['','십','백','천'];
+  const units2 = ['','만','억','조'];
+
+  function convertGroup(n){
+    // n: 0~9999 정수
+    if(n === 0) return '';
+    let result = '';
+    const digits = [Math.floor(n/1000)%10, Math.floor(n/100)%10, Math.floor(n/10)%10, n%10];
+    const pos    = [3, 2, 1, 0];
+    digits.forEach((d, i) => {
+      if(d === 0) return;
+      // 일십/일백/일천 → 십/백/천 (1은 생략)
+      result += (d === 1 && pos[i] > 0 ? '' : units0[d]) + units1[pos[i]];
+    });
+    return result;
+  }
+
+  return str.replace(/\d+/g, function(match){
+    let num = parseInt(match, 10);
+    if(num === 0) return '영';
+    let result = '';
+    const groupNames = ['', '만', '억', '조'];
+    const groups = [];
+    while(num > 0){ groups.unshift(num % 10000); num = Math.floor(num / 10000); }
+    groups.forEach((g, i) => {
+      const offset = groups.length - 1 - i;
+      if(g === 0) return;
+      result += convertGroup(g) + groupNames[offset];
+    });
+    return result || '영';
+  });
+}
 
 // 구두점 제거 공통 함수
 function stripPunct(s){
@@ -1603,8 +1640,8 @@ document.getElementById('btn-whisper-transcribe').addEventListener('click', asyn
     if(!text){ throw new Error('텍스트 변환 결과가 없습니다. 다시 녹음해 주세요.'); }
 
     // 결과 적용
-    transcript = text;
-    recordedText = text;
+    transcript = numToKor(text);
+    recordedText = numToKor(text);
     updateRecordedPreview();
 
     // 텍스트 저장 버튼 활성화
