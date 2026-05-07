@@ -629,7 +629,7 @@ textarea::placeholder{color:var(--text-dim);}
     <div class="tag">전도폭발훈련 · 전문 구두점검</div>
     <h1>전문 구두 점검</h1>
     <p class="subtitle">전도폭발훈련</p>
-    <div style="position:absolute;top:20px;right:16px;font-size:10px;color:var(--text-dim);letter-spacing:.04em;">v2026.05.07 13:36</div>
+    <div style="position:absolute;top:20px;right:16px;font-size:10px;color:var(--text-dim);letter-spacing:.04em;">v2026.05.07 13:45</div>
   </div>
 
   <div id="banner" class="banner"></div>
@@ -1347,6 +1347,16 @@ document.getElementById('btn-analyze').addEventListener('click', compare);
 function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── 숫자 → 한글 변환 ──
+// 고유어 변환 규칙: 숫자+단위 조합별 특수 처리
+const NATIVE_NUM = {
+  '1':'한','2':'두','3':'세','4':'네','5':'다섯',
+  '6':'여섯','7':'일곱','8':'여덟','9':'아홉','10':'열',
+  '20':'스물','30':'서른','40':'마흔','50':'쉰',
+  '60':'예순','70':'일흔','80':'여든','90':'아흔'
+};
+// 고유어를 사용하는 단위
+const NATIVE_UNITS = ['번','개','명','살','가지','마리','그루','채','권','잔','병','벌','켤레','쌍'];
+
 function numToKor(str){
   const units0 = ['','일','이','삼','사','오','육','칠','팔','구'];
   const units1 = ['','십','백','천'];
@@ -1366,8 +1376,26 @@ function numToKor(str){
     return result;
   }
 
-  // 숫자 뒤 한글이 바로 붙으면 공백 추가
-  str = str.replace(/(\d+)([가-힣])/g, '$1 $2');
+  // 숫자+단위 조합: 고유어 단위면 고유어 숫자로, 아니면 한자어로
+  str = str.replace(/(\d+)([가-힣]+)/g, function(_, num, unit){
+    const baseUnit = unit.charAt(0);
+    // 만/억/조는 한자어+붙여쓰기
+    if('만억조'.includes(baseUnit)){
+      const n = parseInt(num, 10);
+      return _numKor(n) + unit;
+    }
+    // 고유어 단위면 고유어 숫자+붙여쓰기
+    if(NATIVE_UNITS.some(u => unit.startsWith(u))){
+      const n = String(parseInt(num, 10));
+      const kor = NATIVE_NUM[n];
+      if(kor) return kor + unit;
+      // 11~99 범위 고유어 없으면 한자어+공백
+      return _numKor(parseInt(num,10)) + ' ' + unit;
+    }
+    // 그 외 한자어+공백
+    return _numKor(parseInt(num,10)) + ' ' + unit;
+  });
+  // 남은 단독 숫자
   return str.replace(/\d+/g, function(match){
     let num = parseInt(match, 10);
     if(num === 0) return '영';
@@ -1382,6 +1410,25 @@ function numToKor(str){
     });
     return result || '영';
   });
+}
+
+function _numKor(num){
+  if(num === 0) return '영';
+  const units0 = ['','일','이','삼','사','오','육','칠','팔','구'];
+  const units1 = ['','십','백','천'];
+  function cg(n){
+    if(n===0) return '';
+    let r='';
+    const d=[(n/1000|0)%10,(n/100|0)%10,(n/10|0)%10,n%10];
+    const p=[3,2,1,0];
+    d.forEach((v,i)=>{ if(!v)return; r+=(v===1&&p[i]>0?'':units0[v])+units1[p[i]]; });
+    return r;
+  }
+  let r='', n=num;
+  const gn=['','만','억','조'], gs=[];
+  while(n>0){gs.unshift(n%10000);n=Math.floor(n/10000);}
+  gs.forEach((g,i)=>{ const o=gs.length-1-i; if(!g)return; r+=cg(g)+gn[o]; });
+  return r;
 }
 
 // 구두점 제거 공통 함수
