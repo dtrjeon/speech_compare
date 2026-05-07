@@ -629,7 +629,7 @@ textarea::placeholder{color:var(--text-dim);}
     <div class="tag">전도폭발훈련 · 전문 구두점검</div>
     <h1>전문 구두 점검</h1>
     <p class="subtitle">전도폭발훈련</p>
-    <div style="position:absolute;top:20px;right:16px;font-size:10px;color:var(--text-dim);letter-spacing:.04em;">v2026.05.07 13:45</div>
+    <div style="position:absolute;top:20px;right:16px;font-size:10px;color:var(--text-dim);letter-spacing:.04em;">v2026.05.07 14:52</div>
   </div>
 
   <div id="banner" class="banner"></div>
@@ -1388,7 +1388,7 @@ function numToKor(str){
     if(NATIVE_UNITS.some(u => unit.startsWith(u))){
       const n = String(parseInt(num, 10));
       const kor = NATIVE_NUM[n];
-      if(kor) return kor + unit;
+      if(kor) return kor + ' ' + unit;
       // 11~99 범위 고유어 없으면 한자어+공백
       return _numKor(parseInt(num,10)) + ' ' + unit;
     }
