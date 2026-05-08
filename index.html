@@ -588,17 +588,17 @@ textarea::placeholder{color:var(--text-dim);}
   border-radius:10px;
 }
 .whisper-label{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;}
-.whisper-key-row{display:flex;gap:8px;margin-bottom:8px;}
+.whisper-key-row{display:flex;gap:8px;margin-bottom:8px;align-items:stretch;}
 .whisper-key-input{
-  flex:1;background:var(--surface);border:1px solid var(--border2);
+  flex:1;min-width:0;background:var(--surface);border:1px solid var(--border2);
   border-radius:8px;padding:8px 12px;
   color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:13px;
-  outline:none;
+  outline:none;box-sizing:border-box;
 }
 .whisper-key-input::placeholder{color:var(--text-dim);}
 .whisper-key-input:focus{border-color:var(--accent);}
 .btn-whisper-save{
-  padding:8px 14px;border-radius:8px;
+  flex-shrink:0;padding:8px 14px;border-radius:8px;
   border:1px solid var(--accent);background:var(--accent-glow);
   color:var(--accent);font-family:'Noto Sans KR',sans-serif;
   font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;
@@ -618,8 +618,37 @@ textarea::placeholder{color:var(--text-dim);}
 .whisper-status{font-size:12px;color:var(--text-dim);text-align:center;margin-top:6px;min-height:16px;}
 .whisper-key-saved{font-size:11px;color:var(--green);margin-top:4px;}
 
-/* 화면에서는 프린트 전용 요소 숨기기 */
-.print-header, .print-legend { display: none; }
+/* ── STT 실패 말주머니 ── */
+.stt-bubble{
+  display:none;
+  position:relative;
+  margin-top:10px;
+  background:#1e2127;
+  border:1.5px solid var(--amber-border);
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:13px;
+  color:var(--amber);
+  line-height:1.7;
+}
+.stt-bubble::before{
+  content:'';
+  position:absolute;
+  top:-9px; left:20px;
+  border-width:0 8px 9px 8px;
+  border-style:solid;
+  border-color:transparent transparent var(--amber-border) transparent;
+}
+.stt-bubble::after{
+  content:'';
+  position:absolute;
+  top:-7px; left:21px;
+  border-width:0 7px 8px 7px;
+  border-style:solid;
+  border-color:transparent transparent #1e2127 transparent;
+}
+.stt-bubble.show{ display:block; }
+.stt-bubble strong{ font-weight:600; color:#fff; }
 </style>
 </head>
 <body>
@@ -629,7 +658,7 @@ textarea::placeholder{color:var(--text-dim);}
     <div class="tag">전도폭발훈련 · 전문 구두점검</div>
     <h1>전문 구두 점검</h1>
     <p class="subtitle">전도폭발훈련</p>
-    <div style="position:absolute;top:20px;right:16px;font-size:10px;color:var(--text-dim);letter-spacing:.04em;">v2026.05.07 14:52</div>
+    <div id="version-tag" style="position:absolute;top:20px;right:16px;font-size:10px;color:var(--text-dim);letter-spacing:.04em;"></div>
   </div>
 
   <div id="banner" class="banner"></div>
@@ -709,16 +738,7 @@ textarea::placeholder{color:var(--text-dim);}
 
       <!-- ④ 저장 -->
       <div class="save-row">
-        <button class="btn-save" id="btn-save-txt" disabled>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="12" y1="18" x2="12" y2="12"/>
-            <line x1="9" y1="15" x2="15" y2="15"/>
-          </svg>
-          ④ 텍스트 저장 (.txt)
-        </button>
-        <button class="btn-save" id="btn-save-audio" disabled>
+        <button class="btn-save" id="btn-save-audio" disabled style="flex:1;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
           </svg>
@@ -755,11 +775,17 @@ textarea::placeholder{color:var(--text-dim);}
           <div class="whisper-label" style="color:var(--red);">🎙️ 실시간 STT</div>
           <div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:8px;">
             녹음 시작하면 말하는 내용이 실시간으로 텍스트 변환됩니다.<br>
-            <span style="color:var(--amber);">⚠ 안드로이드에서 인식 불안정할 수 있습니다.</span>
+            <span style="color:var(--amber);">⚠ 아이폰(iOS)은 STT를 지원하지 않습니다. 클로바노트 탭 또는 Whisper API를 사용하세요.</span>
           </div>
           <div id="stt-live-text" style="font-size:13px;color:var(--text-muted);min-height:40px;
             background:var(--surface2);border-radius:8px;padding:8px 12px;line-height:1.6;">
             녹음 시작 후 여기에 텍스트가 표시됩니다
+          </div>
+          <!-- STT 실패 말주머니 (상시 표시) -->
+          <div class="stt-bubble show" id="stt-fail-bubble">
+            STT가 안 될 경우 (아이폰 등)<br>
+            <strong>👉 클로바노트 탭</strong>을 사용하세요.<br>
+            클로바노트 앱으로 별도 녹음 → 텍스트 자동변환 → 복사 → 붙여넣기 → 적용
           </div>
         </div>
       </div>
@@ -873,7 +899,7 @@ textarea::placeholder{color:var(--text-dim);}
 <script>
 /* ════════════ 챕터 데이터 ════════════ */
 const CHAPTERS = [
-  { id:1, num:'1장', title:'서론',
+  { id:1, num:'1장', title:'서론(아니요)',
     text:`선생님 제가 질문 하나 드려도 되겠습니까. 선생님께서 만일 오늘이라도 이 세상을 떠나신다면 천국에 들어간다는 것을 확신하고 계십니까. 네 그러시군요. 저도 처음에는 잘 몰랐습니다. 그런데 성경을 통하여 그 사실을 알게 되었습니다. 성경은 내가 너희에게 이것을 쓰는 것은 너희로 하여금 너희에게 영생이 있음을 알게 하려 함이라 라고 말씀하십니다. 성경이 기록된 목적은 바로 우리에게 영생이 있음을 알려주어 확신을 갖도록 하기 위함이지요. 집사님은 만일 오늘이라도 이 세상을 떠나신다면 저처럼 천국에 들어간다는 확신이 있으세요. 저희는 이렇게 영생의 확신을 가지고 기쁘게 살고 있습니다. 선생님 제가 어떻게 영생을 얻게 되었는지 선생님도 어떻게 하면 저희들처럼 영생을 얻어 천국에 들어간다는 것을 확신할 수 있는지 말씀드려도 되겠습니까. 선생님 그 말씀을 드리기 전에 질문을 하나만 더 드리겠습니다. 선생님은 어떻게 하면 영생을 얻어 천국에 들어갈 수 있다고 생각하십니까. 선생님의 대답을 듣고 보니 선생님께 가장 기쁜 소식을 전해드릴 수 있겠군요. 그 기쁜 소식은` },
   { id:2, num:'2장', title:'은혜',
     text:`영생은 값없이 주시는 하나님의 선물입니다. 그러므로 영생은 돈이나 공로나 자격으로 얻는 것이 아닙니다. 성경은 너희는 그 은혜에 의하여 구원을 받았으니 이것은 너희에게서 난 것이 아니요 하나님의 선물이라 행위에서 난 것이 아니니 이는 누구든지 자랑하지 못하게 함이라 라고 말씀하십니다. 사실 우리가 살면서 생명과 관계되는 가장 중요한 것은 값없이 다 선물로 받았어요. 예를 들면 밝은 햇빛 공기 물 등은 값없이 다 선물로 거저 받았습니다. 이와 같이 영생도 하나님이 우리에게 값없이 다 선물로 주신다는 것입니다. 그렇다면 하나님은 영생을 왜 선물로 주셔야만 할까요. 이것은 성경이 인간에 관하여 하신 말씀을 잘 이해할 때 좀 더 분명히 알 수 있습니다.` },
@@ -884,7 +910,11 @@ const CHAPTERS = [
   { id:5, num:'5장', title:'그리스도',
     text:`예수 그리스도는 참 하나님이신 동시에 참 인간이십니다. 예수 그리스도는 우리에게 영생을 선물로 주시기 위하여 십자가에서 죽으심으로 우리의 모든 죗값을 대신 치르시고 부활하셨습니다. 이 책이 제가 태어나서 지금까지 지은 모든 죄와 모든 생각 모든 말 모든 행위가 낱낱이 기록되어 있는 책이라고 생각해 보십시다. 성경은 어느 날 이 책이 하나님 앞에 펼쳐지고 제가 행한 대로 심판을 받게 될 것이라고 말씀하십니다. 그런데 바로 이 책에 기록된 저의 죄가 문제입니다. 하나님은 저를 사랑하시기 때문에 저를 벌하시는 것을 원치 않으시고 또한 하나님은 의로우시기 때문에 반드시 저의 죄를 벌하셔야만 합니다. 이 문제를 해결하기 위하여 하나님은 그의 사랑하시는 아들 예수 그리스도를 이 세상에 보내셨습니다. 성경은 우리는 다 양 같아서 그릇 행하여 각기 제 길로 갔거늘 여호와께서는 우리 모두의 죄악을 그에게 예수 그리스도에게 담당시키셨도다라고 말씀하십니다. 하나님이 미워하시는 저의 모든 죄가 그의 사랑하시는 아들 예수 그리스도께로 옮겨졌습니다. 십자가 위에서 우리의 모든 죗값이 다 치러졌을 때 예수 그리스도께서는 다 이루었다라고 말씀하셨습니다. 예수 그리스도는 우리의 모든 죗값을 대신 치르신 후 사흘 만에 부활하셔서 우리에게 영생을 선물로 주시기 위하여 승천하셨습니다. 지금 예수님은 영생을 선물로 주시고자 하십니다. 그렇다면 우리가 이 영생의 선물을 어떻게 받을 수가 있을까요. 이 영생의 선물은 오직 예수 그리스도를 믿음으로 받습니다. 그러나 중요한 사실은` },
   { id:6, num:'6장', title:'믿음',
-    text:`단순한 지식적 동의와 일시적 현세적 믿음은 구원받는 믿음이 아닙니다. 구원받는 참 믿음은 우리의 구원을 위해서 오직 예수 그리스도만을 신뢰하는 것입니다. 성경은 주 예수를 믿으라 그리하면 너와 네 집이 구원을 받으리라라고 말씀하십니다. 구원받는 참 믿음이 무엇인지 이 의자를 가지고 설명하겠습니다. 여기 의자가 있다는 사실을 알고 계시지요. 그러나 단순히 의자가 여기 있다는 것만 알고 앉지 않는다면 여기 있는 의자가 저에게 무슨 소용이 있겠습니까. 송구한 말씀이지만 이 의자를 예수님이라고 가정해 보십시다. 의자가 편하게 해줄 것을 알면서도 의자 옆에 서 있기만 하듯이 예수 그리스도가 구원자란 사실을 머리로만 알고 예수 그리스도를 신뢰하지 않는다면 그 믿음은 단순히 지식적인 동의에 불과하므로 우리 자신을 구원하는 믿음이 아닙니다. 또한 예수 그리스도를 건강문제 재정문제 자녀문제 등 일시적이고 현세적인 문제들만 해결할 분으로 알고 각종 문제들은 예수 그리스도께 부탁드리면서도 자신은 여전히 예수 그리스도를 신뢰하지 않는다면 그 믿음은 일시적 현세적 문제만을 해결하려는 믿음으로 우리 자신을 구원하는 믿음이 아닙니다. 성경이 가르치는 구원받는 참 믿음은 자신의 모든 문제를 가지고 이처럼 자기 자신이 예수님을 온전히 신뢰하는 것을 말합니다. 어느 날 저는 제 삶의 모든 문제를 안은 채로 저 자신을 예수 그리스도께 맡겼습니다. 비로소 저는 영생을 선물로 받게 되었습니다. 얼마나 평안하고 기뻤는지 몰라요. 선생님 앞에서 선생님은 영생을 얻어 천국에 들어가는 이유가 선한 행위라고 하셨죠. 그렇다면 선생님은 영생을 얻어 천국에 들어가려고 결국 누구를 신뢰하고 계셨던 것일까요. 선생님께서 영생을 선물로 받고 천국에 들어가려면 신뢰의 대상을 자신의 선한 행위로부터 오직 예수 그리스도께로 옮기셔야만 합니다.` }
+    text:`단순한 지식적 동의와 일시적 현세적 믿음은 구원받는 믿음이 아닙니다. 구원받는 참 믿음은 우리의 구원을 위해서 오직 예수 그리스도만을 신뢰하는 것입니다. 성경은 주 예수를 믿으라 그리하면 너와 네 집이 구원을 받으리라라고 말씀하십니다. 구원받는 참 믿음이 무엇인지 이 의자를 가지고 설명하겠습니다. 여기 의자가 있다는 사실을 알고 계시지요. 그러나 단순히 의자가 여기 있다는 것만 알고 앉지 않는다면 여기 있는 의자가 저에게 무슨 소용이 있겠습니까. 송구한 말씀이지만 이 의자를 예수님이라고 가정해 보십시다. 의자가 편하게 해줄 것을 알면서도 의자 옆에 서 있기만 하듯이 예수 그리스도가 구원자란 사실을 머리로만 알고 예수 그리스도를 신뢰하지 않는다면 그 믿음은 단순히 지식적인 동의에 불과하므로 우리 자신을 구원하는 믿음이 아닙니다. 또한 예수 그리스도를 건강문제 재정문제 자녀문제 등 일시적이고 현세적인 문제들만 해결할 분으로 알고 각종 문제들은 예수 그리스도께 부탁드리면서도 자신은 여전히 예수 그리스도를 신뢰하지 않는다면 그 믿음은 일시적 현세적 문제만을 해결하려는 믿음으로 우리 자신을 구원하는 믿음이 아닙니다. 성경이 가르치는 구원받는 참 믿음은 자신의 모든 문제를 가지고 이처럼 자기 자신이 예수님을 온전히 신뢰하는 것을 말합니다. 어느 날 저는 제 삶의 모든 문제를 안은 채로 저 자신을 예수 그리스도께 맡겼습니다. 비로소 저는 영생을 선물로 받게 되었습니다. 얼마나 평안하고 기뻤는지 몰라요. 선생님 앞에서 선생님은 영생을 얻어 천국에 들어가는 이유가 선한 행위라고 하셨죠. 그렇다면 선생님은 영생을 얻어 천국에 들어가려고 결국 누구를 신뢰하고 계셨던 것일까요. 선생님께서 영생을 선물로 받고 천국에 들어가려면 신뢰의 대상을 자신의 선한 행위로부터 오직 예수 그리스도께로 옮기셔야만 합니다.` },
+  { id:7, num:'7장', title:'결신',
+    text:`지금까지 제가 성경의 핵심 내용을 요약해서 말씀드렸습니다. 선생님 이해가 되십니까? 네 지금 이 시간 온 우주 만물을 창조하신 하나님께서 선생님께 사랑하는 아들아 딸아 내가 너에게 이 영생의 선물을 주려고 하는데 받겠느냐라고 물으신다면 선생님은 이 영생의 선물을 받기를 원하십니까? 예 받겠습니다. 선생님 참으로 중요한 결정을 하셨습니다. 이제 선생님의 결정이 무엇을 뜻하는지 간단히 말씀드리겠습니다. 첫째, 영생을 얻기 위하여 자신을 신뢰하지 않고 오직 예수 그리스도만을 신뢰하겠다는 뜻입니다. 둘째, 부활하여 살아계신 예수 그리스도를 구원자로 삶의 주인으로 모시겠다는 뜻입니다. 셋째, 자신이 지었던 죄를 회개하고 삶의 방향을 하나님께로 돌리겠다는 뜻입니다. 그렇게 하기를 원하십니까? 예 선생님 하나님께서는 우리의 기도에 귀를 기울여 들어주십니다. 저를 따라서 하나님께 한마디씩 기도해 주세요. 네 그렇게 하겠습니다. 하나님 아버지 지금까지 저는 제 자신을 믿고 살아온 죄인입니다. 저의 죄를 회개하오니 용서해 주십시오. 예수님이 저의 죄 때문에 십자가에서 죽으시고 부활하신 것을 믿습니다. 지금 이 시간 제 마음의 문을 엽니다. 예수님이 제 마음에 들어오셔서 저의 구원자와 삶의 주인이 되어 주십시오. 이제부터 제가 하나님 앞에 설 때까지 저의 삶을 인도해 주십시오. 예수님의 이름으로 기도드립니다. 아멘 아멘 제가 선생님을 위하여 기도하겠습니다. 하나님 아버지 감사합니다. 영접하는 자 곧 그 이름을 믿는 자들에게는 하나님의 자녀가 되는 권세를 주신다라는 말씀대로 선생님이 하나님의 자녀가 되게 해 주셔서 감사드립니다. 동이 서에서 먼 것 같이 내 죄를 멀리 옮겼느니라 다시는 내 죄를 기억치 아니하리라라는 말씀대로 선생님에게 죄 용서의 확신을 주시고 나를 믿는 자는 멸망치 않고 영생을 얻으리라라는 말씀대로 선생님에게 구원의 확신을 주시옵소서 예수님의 이름으로 기도드립니다. 아멘 아멘 이제 선생님이 지금 기도하신 일이 무엇을 뜻하는지 예수 그리스도께서 하신 말씀을 읽어주시면 좋겠습니다. 여기를 읽어주시겠어요. 진실로 진실로 너희에게 이르노니 믿는 자는 영생을 가졌나니 예수 그리스도를 믿는 자는 무엇을 가졌다고 했나요? 영생을요 영생을 가질 것이라고 했나요? 아니면 이미 가졌다고 했나요? 가졌다고 했습니다. 여기 너희에게 와 예수 그리스도를 믿는 자에 선생님의 이름을 넣어서 읽어주시겠어요. 진실로 진실로 길동이에게 이르노니 예수 그리스도를 믿는 길동이는 영생을 가졌나니 이 말씀에 근거해서 한 번 더 질문을 드리겠습니다. 선생님 이 말씀에 근거해서 선생님은 영생을 얻었기에 만일 오늘이라도 이 세상을 떠나신다면 천국에 들어간다는 것을 확신하시는지요. 예. 선생님 이 말씀에 근거해서 선생님은 천국에 들어갈 수 있는 이유가 무엇이라고 생각하십니까? 예수 그리스도를 믿기 때문입니다.` },
+  { id:8, num:'8장', title:'즉석양육',
+    text:`오늘 선생님이 예수 그리스도를 믿고 영생을 얻어 하나님의 자녀가 되신 것을 축하드립니다. 감사합니다. 오늘이 제게는 매우 특별한 날이 되었습니다. 이것은 선생님께 드리려고 가져온 책인데요. 여기에는 제가 방금 말씀드린 내용이 간단히 요약되어 있고 또한 선생님의 믿음이 성장하는 데 도움이 될 내용이 있습니다. 그래요 먼저 여기 나의 결정을 읽어주시겠습니까? 예 네 감사합니다. 이것이 오늘 선생님의 결정이시죠? 네 여기에 오늘 날짜를 쓰시고 선생님이 직접 서명해 주시겠어요? 네 그렇게 하겠습니다. 저도 증인으로서 서명하겠습니다. 그리고 제 연락처도 적어드리겠습니다. 신앙생활에 도움이 필요할 때는 언제든 연락 주십시오. 잘 도와주시면 고맙겠습니다. 선생님 아기가 태어나면 잘 자라야 부모의 마음이 기쁜 것처럼 선생님도 지금 영적으로 갓 태어난 생명과 같기 때문에 하나님은 선생님의 믿음이 성장하기를 원하십니다. 여기에 믿음이 잘 자라는 데 도움이 되는 신앙 성장의 5가지 방안이 적혀 있는데 같이 보시지요. 네 그렇게 하겠습니다. 여기 진한 글씨를 읽어주시겠어요. 첫째 성경 성경 요한복음을 하루에 한 장씩 읽으십시오. 성경은 영혼의 양식입니다. 우리가 밥을 잘 먹어야 몸이 건강하게 되듯이 하나님의 말씀을 잘 읽어야 우리의 영혼이 건강해질 수 있지요. 제가 요한복음을 한 권 드리고 가겠습니다. 하루에 한 장씩 읽어보세요. 괜찮으시면 제가 일주일 후 다시 찾아뵙고 싶은데요. 그때 질문이 있으시면 도와드리겠습니다. 네 그렇게 해 주세요. 둘째 기도 매일 기도 시간을 정해놓고 하나님과 교제하십시오. 기도는 영혼의 호흡입니다. 하나님의 자녀는 기도를 통해 하나님과 교제할 수 있어요. 이렇게 하시면 기도를 쉽게 배울 수 있습니다. 저와 같이 두 손을 모아보세요. 첫째 손가락 하나님 아버지 맨 먼저 기도할 때 제일 중요한 것은 기도의 대상입니다. 하나님이 이제는 선생님의 영적 아버지가 되십니다. 그래서 먼저 하나님 아버지라고 부르시는 겁니다. 둘째 손가락 감사합니다. 하나님께서는 감사를 기뻐하십니다. 영생의 선물을 주신 것도 감사하고 건강 주신 것도 감사하고 감사한 일들을 말씀드리면 됩니다. 셋째 손가락 용서해 주세요. 하나님께서는 우리의 잘못을 용서해 주시기를 원하십니다. 실수하고 잘못한 것을 하나님께 다 용서해 달라고 말씀드리세요. 넷째 손가락 도와주세요. 하나님께서는 우리를 도와주시기를 원하십니다. 우리 연약한 인생은 하나님의 도우심 없이는 살 수가 없습니다. 필요한 것을 다 말씀하시면 하나님께서 들어주십니다. 다섯째 손가락. 예수님의 이름으로 기도드립니다. 아멘 예수님의 이름으로 기도하면 응답해 주시겠다고 약속하셨습니다. 아멘은 동의합니다. 또는 기도한 대로 이루어지기를 원합니다라는 뜻입니다. 선생님도 이렇게 기도하실 수 있겠지요? 네 다시 한 번 해볼까요? 하나님 아버지 감사합니다. 용서해 주세요. 도와주세요. 예수님의 이름으로 기도드립니다. 아멘 참 잘하셨습니다. 감사합니다. 셋째 예배 교회에 정기적으로 출석하여 예배를 드리십시오. 예배란 구원받은 성도가 함께 모여서 하나님을 찬양하고 경배드리는 것입니다. 선생님 이번 주일은 선생님과 오전 11시 예배를 함께 드리고 싶어요. 괜찮으시다면 제가 10시 30분에 댁 앞으로 모시러 오겠습니다. 네 그렇게 도와주시면 참 고맙겠습니다. 주일 아침에 기다리겠습니다. 넷째 교재 믿음 안에서 성장하도록 도와줄 그리스도인들과 교제하십시오. 선생님 교재란 믿는 그리스도인들과의 사귐을 뜻합니다. 믿음의 교재 역시 매우 중요합니다. 그래서 우리 교회에서는 선생님처럼 처음 나오신 분들을 위해서 새 가족 모임을 운영하고 있어요. 원하신다면 이번 주부터 참여하실 수 있도록 제가 안내하겠습니다. 이런 모임에 참여하면 믿음이 잘 자랄 수 있습니다. 예 그렇게 하겠습니다. 마지막으로 전도 예수 그리스도를 알지 못하는 사람들에게 소개하십시오. 전도를 하셔야 우리의 신앙이 건강하게 성장합니다. 전도란 내가 받은 구원의 기쁜 소식을 다른 사람과 함께 나누는 것입니다. 하나님의 구원 역사는 믿는 사람이 안 믿는 사람에게 또 예수님을 아는 사람이 모르는 사람에게 전함으로 이루어지고 있습니다. 혹시 오늘 들으신 기쁜 소식을 전하고 싶은 분이 있으십니까? 친한 친구가 있는데 어떻게 전해야 할지 잘 모르겠어요. 전하는 것이 어려우시면 저희가 도와드릴게요. 그분 외에도 이 소식을 전하고 싶은 분이 더 있으면 저희에게 연락 주세요. 저희가 방문해서 이 소식을 전해드리겠습니다. 알겠습니다. 네 그러면 이번 주일 오전 10시 30분에 댁 앞으로 모시러 오겠습니다. 정말 감사합니다. 선생님 선생님과 함께 제가 기도드리고 이제 자리에서 일어나겠습니다. 혹시 함께 기도하실 제목이 있으신지요? 온 가족이 건강했으면 좋겠습니다. 그럼 제가 기도하겠습니다. 하나님 아버지 오늘 선생님과 귀한 교제를 나누게 해 주셔서 감사합니다. 앞으로 선생님의 믿음이 건강하게 자라도록 도와주세요. 전도 대상자의 기도 제목을 위해서 기도한다. 이번 주일에 만나서 함께 예배드릴 때 기쁨이 넘치게 해 주세요. 예수님의 이름으로 기도드립니다. 아멘 아멘 이렇게 오랜 시간 저희 이야기를 끝까지 들어주셔서 감사합니다. 안녕히 계십시오. 정말 감사합니다. 안녕히 가세요.` }
 ];
 
 /* ════════════ 상태 ════════════ */
@@ -899,7 +929,7 @@ let audioBlob = null;
 let audioMime = '';
 let audioExt  = 'webm';
 let lastPreviewData = null;
-let whisperApiKey = localStorage.getItem('whisper_api_key') || '';
+let whisperApiKey = (function(){ try{ return localStorage.getItem('whisper_api_key') || ''; }catch(e){ return ''; } })();
 let recMode = 'stt'; // 'api' | 'stt'
 
 /* ════════════ 유틸 ════════════ */
@@ -1114,7 +1144,7 @@ function _startMediaRecorder(){
       btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> 음성 저장 (.'+audioExt+')';
       btn.disabled=false; btn.classList.add('ready');
       // Whisper 모드: 음성 저장 완료 → Whisper 추출 버튼 안내
-      if(recMode==='api') setStatus('음성 녹음 완료 ✓ — 텍스트 추출(Whisper) 버튼을 누르세요');
+      if(recMode==='api') setStatus('음성 녹음 완료 ✓ — ⑤ 텍스트 추출(Whisper) 버튼을 누르세요');
     };
     mediaRecorder.start();
   }).catch(()=>{
@@ -1128,15 +1158,15 @@ function stopRec(){
   if(recognition){ recognition.onend=null; try{ recognition.stop(); }catch(e){} }
   if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
   document.getElementById('btn-rec').classList.remove('recording');
-  document.getElementById('rec-label').textContent = '② 녹음 시작';
+  document.getElementById('rec-label').textContent = '③ 녹음 시작';
   if(transcript.trim()) recordedText = transcript;
   updateRecordedPreview();
   if(transcript.trim()){
-    const btn = document.getElementById('btn-save-txt');
+    const btn = document.getElementById('btn-save-audio');
     btn.disabled = false; btn.classList.add('ready');
   }
   if(recMode === 'api'){
-    setStatus('녹음 완료 ✓ — ③ 텍스트 추출(Whisper) 버튼을 누르세요');
+    setStatus('녹음 완료 ✓ — ⑤ 텍스트 추출(Whisper) 버튼을 누르세요');
   } else {
     setStatus('녹음 완료 ✓ — 비교 분석 버튼을 누르세요 (STT 텍스트 사용)');
   }
@@ -1162,20 +1192,19 @@ function saveTxtFile(ts, text){
   return true;
 }
 
-/* ════════════ 텍스트 저장 (단독) ════════════ */
-document.getElementById('btn-save-txt').addEventListener('click', function(){
-  const text = recordedText.trim() || transcript.trim();
-  if(!text){ alert('저장할 텍스트가 없습니다.'); return; }
-  const ts = makeTimestamp();
-  saveTxtFile(ts, text);
-  setStatus('텍스트 파일이 저장되었습니다: 녹음_' + ts + '.txt');
-});
 
 /* ════════════ 음성 저장 ════════════ */
 document.getElementById('btn-save-audio').addEventListener('click', function(){
-  if(!audioBlob){ alert('저장할 음성이 없습니다.'); return; }
-
   const ts = makeTimestamp();
+
+  // 음성 없고 텍스트만 있는 경우 (음성 저장 불가 환경)
+  if(!audioBlob){
+    const textOnly = transcript.trim() || recordedText.trim();
+    if(!textOnly){ alert('저장할 내용이 없습니다.'); return; }
+    saveTxtFile(ts, textOnly);
+    setStatus('텍스트 파일이 저장되었습니다: 녹음_' + ts + '.txt');
+    return;
+  }
 
   // ① 음성 저장 (항상)
   const audioFilename = '녹음_' + ts + '.' + (audioExt || 'webm');
@@ -1187,8 +1216,8 @@ document.getElementById('btn-save-audio').addEventListener('click', function(){
 
   // ── Whisper 모드: 음성만 저장 후 Whisper 추출 안내 ──
   if(recMode === 'api'){
-    setStatus('음성 저장 완료 ✓ — ③ 텍스트 추출(Whisper) 버튼을 누르세요');
-    showBanner('✓ 음성(.'+audioExt+') 저장 완료!<br>이제 아래 <strong>③ 텍스트 추출(Whisper)</strong> 버튼을 눌러 텍스트를 추출하세요.', 'ok');
+    setStatus('음성 저장 완료 ✓ — ⑤ 텍스트 추출(Whisper) 버튼을 누르세요');
+    showBanner('✓ 음성(.'+audioExt+') 저장 완료!<br>이제 아래 <strong>⑤ 텍스트 추출(Whisper)</strong> 버튼을 눌러 텍스트를 추출하세요.', 'ok');
     return;
   }
 
@@ -1296,8 +1325,6 @@ document.getElementById('btn-clear-rec').addEventListener('click', function(){
   audioBlob = null; audioChunks = []; audioMime = ''; audioExt = 'webm';
   document.getElementById('clova-paste').value = '';
   document.getElementById('file-name-tag').style.display = 'none';
-  document.getElementById('btn-save-txt').disabled = true;
-  document.getElementById('btn-save-txt').classList.remove('ready');
   document.getElementById('btn-save-audio').disabled = true;
   document.getElementById('btn-save-audio').classList.remove('ready');
   document.getElementById('btn-save-audio').innerHTML =
@@ -1323,8 +1350,6 @@ document.getElementById('btn-clear-all').addEventListener('click', function(){
   audioBlob = null; audioChunks = []; audioMime = ''; audioExt = 'webm';
   document.getElementById('clova-paste').value = '';
   document.getElementById('file-name-tag').style.display = 'none';
-  document.getElementById('btn-save-txt').disabled = true;
-  document.getElementById('btn-save-txt').classList.remove('ready');
   document.getElementById('btn-save-audio').disabled = true;
   document.getElementById('btn-save-audio').classList.remove('ready');
   document.getElementById('btn-save-audio').innerHTML =
@@ -1586,9 +1611,9 @@ function compare(){
 }
 
 /* ════════════ 녹음 방식 토글 ════════════ */
-function applyRecMode(mode){
-  recMode = mode;
-  const isApi = mode === 'api';
+function applyRecMode(newMode){
+  recMode = newMode;
+  const isApi = newMode === 'api';
   // 토글 상태
   document.getElementById('rec-mode-toggle').checked = !isApi;
   // 제목/설명 업데이트
@@ -1601,11 +1626,15 @@ function applyRecMode(mode){
   document.getElementById('panel-rec-api').classList.toggle('active', isApi);
   document.getElementById('panel-rec-stt').classList.toggle('active', !isApi);
   // 번호 업데이트
-  document.getElementById('rec-label').textContent       = isApi ? '③ 녹음 시작' : '③ 녹음 시작';
-  document.getElementById('whisper-btn-label').textContent = isApi ? '⑤ 텍스트 추출 (Whisper)' : '';
+  document.getElementById('rec-label').textContent = '③ 녹음 시작';
+  document.getElementById('whisper-btn-label').textContent = isApi ? '⑤ 텍스트 추출 (Whisper)' : '⑤ 텍스트 추출 (Whisper)';
+  // 음성 저장 버튼 단계 번호 업데이트
+  const saveBtn = document.getElementById('btn-save-audio');
+  const saveSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+  saveBtn.innerHTML = saveSvg + (isApi ? ' ④ 음성 저장' : ' ④ 음성 저장');
   setStatus(isApi
     ? 'Whisper API 방식 — ② 권한 → ③ 녹음 → ④ 음성저장 → ⑤ 텍스트추출 → 비교분석'
-    : '실시간 STT 방식 — ② 권한 → ③ 녹음 → ④ 음성저장 → 비교분석');
+    : '실시간 STT 방식 — ② 권한 → ③ 녹음 → ④ 음성저장 → 비교분석 (STT 실패 시 클로바노트 탭 사용)');
 }
 
 document.getElementById('rec-mode-toggle').addEventListener('change', function(){
@@ -1635,7 +1664,7 @@ document.getElementById('btn-whisper-key-save').addEventListener('click', functi
     alert('올바른 OpenAI API 키가 아닙니다.\nsk- 로 시작하는 키를 입력하세요.'); return;
   }
   whisperApiKey = key;
-  localStorage.setItem('whisper_api_key', key);
+  try{ localStorage.setItem('whisper_api_key', key); }catch(e){}
   document.getElementById('whisper-key-input').value = '••••••••••••••••';
   document.getElementById('whisper-key-saved').style.display = 'block';
   document.getElementById('btn-whisper-transcribe').disabled = false;
@@ -1693,9 +1722,9 @@ document.getElementById('btn-whisper-transcribe').addEventListener('click', asyn
     recordedText = numToKor(text);
     updateRecordedPreview();
 
-    // 텍스트 저장 버튼 활성화
-    document.getElementById('btn-save-txt').disabled = false;
-    document.getElementById('btn-save-txt').classList.add('ready');
+    // 음성 저장 버튼 활성화 (텍스트 저장 포함)
+    document.getElementById('btn-save-audio').disabled = false;
+    document.getElementById('btn-save-audio').classList.add('ready');
 
     statusEl.textContent = '✓ 변환 완료! ' + text.length + '자';
     showBanner('✓ Whisper 텍스트 추출 완료!<br>아래 <strong>비교 분석</strong> 버튼을 누르세요.', 'ok');
@@ -1893,6 +1922,18 @@ document.getElementById('btn-print').addEventListener('click', function(){
     document.documentElement.style.colorScheme = '';
   }, 500);
 });
+
+/* ════════════ 버전 타임 (한국 시간 자동) ════════════ */
+(function(){
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const y = kst.getUTCFullYear();
+  const mo = String(kst.getUTCMonth()+1).padStart(2,'0');
+  const d = String(kst.getUTCDate()).padStart(2,'0');
+  const h = String(kst.getUTCHours()).padStart(2,'0');
+  const mi = String(kst.getUTCMinutes()).padStart(2,'0');
+  document.getElementById('version-tag').textContent = 'v'+y+'.'+mo+'.'+d+' '+h+':'+mi;
+})();
 
 renderChapters();
 </script>
