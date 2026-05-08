@@ -1149,18 +1149,11 @@ function stopRec(){
   if(transcript.trim()){
     const btn = document.getElementById('btn-save-audio');
     btn.disabled = false; btn.classList.add('ready');
-    // STT 텍스트 즉시 자동 저장
-    if(recMode === 'stt'){
-      const ts = makeTimestamp();
-      saveTxtFile(ts, transcript.trim());
-      setStatus('녹음 완료 ✓ — 텍스트 자동저장됨. 비교 분석 버튼을 누르세요');
-      return;
-    }
   }
   if(recMode === 'api'){
     setStatus('녹음 완료 ✓ — ⑤ 텍스트 추출(Whisper) 버튼을 누르세요');
   } else {
-    setStatus('녹음 완료 ✓ — ④ 음성저장 후 비교 분석 버튼을 누르세요');
+    setStatus('녹음 완료 ✓ — ④ 음성저장 버튼을 누르세요');
   }
 }
 
@@ -1191,12 +1184,9 @@ document.getElementById('btn-save-audio').addEventListener('click', function(){
   // 음성 없고 텍스트만 있는 경우 (음성 저장 불가 환경)
   // STT 모드는 stopRec()에서 이미 저장됐으므로 안내만 표시
   if(!audioBlob){
+    // 음성 저장 불가 환경 — 텍스트만 저장
     const textOnly = transcript.trim() || recordedText.trim();
     if(!textOnly){ alert('저장할 내용이 없습니다.'); return; }
-    if(recMode === 'stt'){
-      setStatus('텍스트는 녹음 종료 시 이미 저장되었습니다.');
-      return;
-    }
     saveTxtFile(ts, textOnly);
     setStatus('텍스트 파일이 저장되었습니다: 녹음_' + ts + '.txt');
     return;
@@ -1217,7 +1207,7 @@ document.getElementById('btn-save-audio').addEventListener('click', function(){
     return;
   }
 
-  // ── STT 모드: 텍스트는 녹음 종료 시 이미 자동저장됨, 음성만 저장 완료 안내 ──
+  // ── STT 모드: 텍스트 있으면 오디오와 동일 파일명으로 함께 저장 ──
   const savedText = transcript.trim() || recordedText.trim();
   if(!savedText){
     setStatus('음성 저장 완료 ✓ (STT 텍스트 없음) — 클로바노트 탭으로 텍스트를 입력하세요');
@@ -1226,8 +1216,12 @@ document.getElementById('btn-save-audio').addEventListener('click', function(){
     return;
   }
   recordedText = savedText;
-  setStatus('음성 저장 완료 ✓ — 비교 분석 버튼을 누르세요');
-  showBanner('✓ 음성(.'+audioExt+') 저장 완료! (텍스트는 녹음 종료 시 이미 저장됨)', 'ok');
+  // ② 텍스트 저장 (오디오와 동일 파일명)
+  setTimeout(() => {
+    saveTxtFile(ts, savedText);
+    setStatus('음성 + 텍스트 저장 완료 ✓ — 비교 분석 버튼을 누르세요');
+    showBanner('✓ 녹음_' + ts + '.' + (audioExt||'webm') + ' 및 녹음_' + ts + '.txt 저장 완료!', 'ok');
+  }, 300);
 });
 
 /* ════════════ 클로바노트 파일 불러오기 ════════════ */
