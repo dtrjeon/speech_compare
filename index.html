@@ -1180,6 +1180,7 @@ function saveTxtFile(ts, text){
 /* ════════════ 음성 저장 ════════════ */
 document.getElementById('btn-save-audio').addEventListener('click', function(){
   const ts = makeTimestamp();
+  const audioFilename = '녹음_' + ts + '.' + (audioExt || 'webm');
 
   // 음성 없고 텍스트만 있는 경우 (음성 저장 불가 환경)
   // STT 모드는 stopRec()에서 이미 저장됐으므로 안내만 표시
@@ -1192,36 +1193,45 @@ document.getElementById('btn-save-audio').addEventListener('click', function(){
     return;
   }
 
-  // ① 음성 저장 (항상)
-  const audioFilename = '녹음_' + ts + '.' + (audioExt || 'webm');
-  const url = URL.createObjectURL(audioBlob);
-  const a = document.createElement('a');
-  a.href = url; a.download = audioFilename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-
   // ── Whisper 모드: 음성만 저장 후 Whisper 추출 안내 ──
   if(recMode === 'api'){
+    const url = URL.createObjectURL(audioBlob);
+    const a = document.createElement('a');
+    a.href = url; a.download = audioFilename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
     setStatus('음성 저장 완료 ✓ — ⑤ 텍스트 추출(Whisper) 버튼을 누르세요');
     showBanner('✓ 음성(.'+audioExt+') 저장 완료!<br>이제 아래 <strong>⑤ 텍스트 추출(Whisper)</strong> 버튼을 눌러 텍스트를 추출하세요.', 'ok');
     return;
   }
 
-  // ── STT 모드: 텍스트 있으면 오디오와 동일 파일명으로 함께 저장 ──
+  // ── STT 모드: txt 먼저 저장 → 1초 후 오디오 저장 (브라우저 연속 다운로드 차단 방지) ──
   const savedText = transcript.trim() || recordedText.trim();
   if(!savedText){
+    const url = URL.createObjectURL(audioBlob);
+    const a = document.createElement('a');
+    a.href = url; a.download = audioFilename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
     setStatus('음성 저장 완료 ✓ (STT 텍스트 없음) — 클로바노트 탭으로 텍스트를 입력하세요');
     showBanner('✓ 음성(.'+audioExt+') 저장 완료.<br>⚠ STT 인식 결과가 없습니다. 아래 <strong>클로바노트 탭</strong>에서 텍스트를 붙여넣으세요.', 'warn');
     document.getElementById('tab-clova').click();
     return;
   }
   recordedText = savedText;
-  // ② 텍스트 저장 (오디오와 동일 파일명)
+  // txt 먼저 저장
+  saveTxtFile(ts, savedText);
+  setStatus('텍스트 저장 중... 잠시 후 음성 파일이 저장됩니다');
+  // 1초 후 오디오 저장
   setTimeout(() => {
-    saveTxtFile(ts, savedText);
+    const url = URL.createObjectURL(audioBlob);
+    const a = document.createElement('a');
+    a.href = url; a.download = audioFilename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
     setStatus('음성 + 텍스트 저장 완료 ✓ — 비교 분석 버튼을 누르세요');
-    showBanner('✓ 녹음_' + ts + '.' + (audioExt||'webm') + ' 및 녹음_' + ts + '.txt 저장 완료!', 'ok');
-  }, 300);
+    showBanner('✓ 녹음_' + ts + '.txt 및 녹음_' + ts + '.' + (audioExt||'webm') + ' 저장 완료!', 'ok');
+  }, 1000);
 });
 
 /* ════════════ 클로바노트 파일 불러오기 ════════════ */
@@ -1232,14 +1242,24 @@ document.getElementById('btn-file-upload').addEventListener('click', function(){
 document.getElementById('clova-file-input').addEventListener('change', function(){
   const file = this.files[0];
   if(!file) return;
+  // txt 파일 여부 확인 (MIME 타입 또는 확장자)
+  const isTxt = file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt') || file.name.toLowerCase().endsWith('.text') || file.type === '';
+  if(!isTxt){
+    showBanner('⚠ txt 파일만 불러올 수 있습니다.<br>클로바노트 앱에서 <strong>공유 → txt 저장</strong> 후 선택해 주세요.', 'err');
+    this.value = ''; return;
+  }
+  // 안드로이드 content:// URI는 size가 0으로 잡힐 수 있어 0은 허용
   if(file.size > 5 * 1024 * 1024){
     showBanner('⚠ 파일이 너무 큽니다 (5MB 이하만 가능)', 'err'); return;
   }
   const reader = new FileReader();
   function applyText(text) {
+    if(!text || !text.trim()){
+      showBanner('⚠ 파일 내용이 비어있습니다.', 'err'); return;
+    }
     document.getElementById('clova-paste').value = text;
     const tag = document.getElementById('file-name-tag');
-    tag.textContent = '📄 ' + file.name;
+    tag.textContent = '📄 ' + (file.name || '선택된 파일');
     tag.style.display = 'block';
     showBanner('✓ 파일을 불러왔습니다. 아래 <strong>적용하기</strong> 버튼을 누르세요.', 'ok');
     setStatus('파일 불러오기 완료 — 적용 버튼을 누르세요');
