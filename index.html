@@ -413,7 +413,6 @@ textarea::placeholder{color:var(--text-dim);}
   .progress-fill  { border-radius: 1.5mm !important; }
 }
 
-
 /* ════════════ 미리보기 모달 ════════════ */
 .preview-modal{
   display:none;position:fixed;inset:0;z-index:9999;
@@ -479,17 +478,6 @@ textarea::placeholder{color:var(--text-dim);}
 }
 .pv-legend-item{display:flex;align-items:center;gap:1.5mm;}
 
-/* 점수 바 */
-.pv-score{
-  display:flex;align-items:center;gap:4mm;
-  background:#f5f5f5;border:0.5pt solid #ccc;
-  border-radius:2mm;padding:3mm 4mm;margin-bottom:4mm;
-}
-.pv-score-num{font-size:26pt;font-weight:900;line-height:1;min-width:18mm;}
-.pv-score-grade{font-size:13pt;font-weight:700;}
-.pv-score-desc{font-size:9pt;color:#555;margin-top:1mm;}
-.pv-score-chapter{font-size:8pt;color:#888;margin-bottom:1mm;}
-
 /* 2단 비교 */
 .pv-subtitle{font-size:10pt;color:#444;margin-bottom:1mm;}
 /* 표 형식 */
@@ -541,8 +529,6 @@ textarea::placeholder{color:var(--text-dim);}
 .pv-progress-label{display:flex;justify-content:space-between;font-size:8pt;color:#555;margin-bottom:1.5mm;}
 .pv-progress-track{height:3mm;background:#ddd;border-radius:1.5mm;overflow:hidden;}
 .pv-progress-fill{height:100%;border-radius:1.5mm;}
-
-
 
 /* ── 녹음 방식 토글 스위치 ── */
 .rec-mode-row{
@@ -1115,7 +1101,6 @@ function startRec(){
   try { recognition.start(); } catch(e){ setStatus('녹음 시작 실패: '+e.message); }
 }
 
-
 function _startMediaRecorder(){
   const _candidates = [
     { mime: 'audio/mp4',              ext: 'm4a'  },
@@ -1192,7 +1177,6 @@ function saveTxtFile(ts, text){
   return true;
 }
 
-
 /* ════════════ 음성 저장 ════════════ */
 document.getElementById('btn-save-audio').addEventListener('click', function(){
   const ts = makeTimestamp();
@@ -1224,8 +1208,10 @@ document.getElementById('btn-save-audio').addEventListener('click', function(){
   // ── STT 모드: 텍스트 있으면 함께 저장 후 자동 비교 ──
   const savedText = transcript.trim() || recordedText.trim();
   if(!savedText){
-    setStatus('음성 저장 완료 ✓ (STT 텍스트 없음)');
-    showBanner('✓ 음성(.'+audioExt+') 저장 완료.<br>⚠ STT 인식 결과가 없습니다. 클로바노트 탭을 이용하거나 Whisper API 방식으로 전환하세요.', 'warn');
+    setStatus('음성 저장 완료 ✓ (STT 텍스트 없음) — 클로바노트 탭으로 텍스트를 입력하세요');
+    showBanner('✓ 음성(.'+audioExt+') 저장 완료.<br>⚠ STT 인식 결과가 없습니다. 아래 <strong>클로바노트 탭</strong>에서 텍스트를 붙여넣으세요.', 'warn');
+    // 클로바노트 탭으로 자동 전환
+    document.getElementById('tab-clova').click();
     return;
   }
   recordedText = savedText;
@@ -1643,7 +1629,6 @@ document.getElementById('rec-mode-toggle').addEventListener('change', function()
 
 // 초기 상태 적용 (기본: stt)
 applyRecMode('stt');
-
 
 /* ════════════ Whisper API ════════════ */
 
