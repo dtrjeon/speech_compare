@@ -1213,9 +1213,8 @@ document.getElementById('btn-save-audio').addEventListener('click', function(){
     a.href = url; a.download = audioFilename;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
-    setStatus('음성 저장 완료 ✓ (STT 텍스트 없음) — 클로바노트 탭으로 텍스트를 입력하세요');
-    showBanner('✓ 음성(.'+audioExt+') 저장 완료.<br>⚠ STT 인식 결과가 없습니다. 아래 <strong>클로바노트 탭</strong>에서 텍스트를 붙여넣으세요.', 'warn');
-    document.getElementById('tab-clova').click();
+    setStatus('음성 저장 완료 ✓ (STT 텍스트 없음)');
+    showBanner('✓ 음성(.'+audioExt+') 저장 완료.', 'ok');
     return;
   }
   recordedText = savedText;
